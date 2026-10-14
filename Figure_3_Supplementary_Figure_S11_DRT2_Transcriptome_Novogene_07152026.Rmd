@@ -1,0 +1,6688 @@
+---
+title: "DRT2_Transcriptome_Novogene"
+author: "Murat Buyukyoruk"
+date: "2025-07-21"
+output: html_document
+---
+
+```{r}
+library(stringr)
+getwd()
+MG1655_gff <-  read.csv("./data/input/Annotations.csv", header = F)
+
+MG1655_gff <- subset(MG1655_gff, MG1655_gff$V3 != "gene")
+
+MG1655_gff$locus_tag <- str_extract(MG1655_gff$V9, pattern = "(?<=locus_tag=)[^;]*")
+MG1655_gff$gene <- str_extract(MG1655_gff$V9, pattern = "(?<=gene=)[^;]*")
+MG1655_gff$product <- str_extract(MG1655_gff$V9, pattern = "(?<=product=)[^;]*")
+MG1655_gff <- MG1655_gff[!duplicated(MG1655_gff$locus_tag),]
+MG1655_gff$chr <- "NC_000913.3 Escherichia coli str. K-12 substr. MG1655, complete genome"
+
+MG1655_official_reference <- MG1655_gff[ , c(10, 1, 4:5, 7, 11:12)]
+colnames(MG1655_official_reference) <- c("GeneID", "chr", "start", "end", "strand", "gene", "product")
+
+MG1655_annotations <- MG1655_official_reference[ , c(1:5)]
+
+write.csv(MG1655_official_reference, "./data/output/MG1655_official_reference_annotations.csv", quote = F, row.names = F)
+```
+
+```{r}
+library(Rsubread)
+
+buildindex(basename = "ref_index", reference = "./data/input/input_sequences.fasta")
+```
+
+```{r}
+library(Rsubread)
+
+getwd()
+
+DRF_01_readfile1 <- dir(path = "./data/input/reads/fastq", pattern = "E_1_1.fq.gz", full.names = T, recursive = F)
+DRF_01_readfile2 <- dir(path = "./data/input/reads/fastq", pattern = "E_1_2.fq.gz", full.names = T, recursive = F)
+DRF_01_align.stat <- align(index = "ref_index", readfile1 = DRF_01_readfile1, readfile2 = DRF_01_readfile2, type = "rna", input_format = "gzFASTQ", phredOffset = 33, nthreads = 20, output_file = "./data/input/reads/bams/EGFP_1.BAM")
+
+DRF_02_readfile1 <- dir(path = "./data/input/reads/fastq", pattern = "E_2_1.fq.gz", full.names = T, recursive = F)
+DRF_02_readfile2 <- dir(path = "./data/input/reads/fastq", pattern = "E_2_2.fq.gz", full.names = T, recursive = F)
+DRF_02_align.stat <- align(index = "ref_index", readfile1 = DRF_02_readfile1, readfile2 = DRF_02_readfile2, type = "rna", input_format = "gzFASTQ", phredOffset = 33, nthreads = 20, output_file = "./data/input/reads/bams/EGFP_2.BAM")
+
+DRF_03_readfile1 <- dir(path = "./data/input/reads/fastq", pattern = "E_3_1.fq.gz", full.names = T, recursive = F)
+DRF_03_readfile2 <- dir(path = "./data/input/reads/fastq", pattern = "E_3_2.fq.gz", full.names = T, recursive = F)
+DRF_03_align.stat <- align(index = "ref_index", readfile1 = DRF_03_readfile1, readfile2 = DRF_03_readfile2, type = "rna", input_format = "gzFASTQ", phredOffset = 33, nthreads = 20, output_file = "./data/input/reads/bams/EGFP_3.BAM")
+
+DRF_04_readfile1 <- dir(path = "./data/input/reads/fastq", pattern = "N_518_1_1.fq.gz", full.names = T, recursive = F)
+DRF_04_readfile2 <- dir(path = "./data/input/reads/fastq", pattern = "N_518_1_2.fq.gz", full.names = T, recursive = F)
+DRF_04_align.stat <- align(index = "ref_index", readfile1 = DRF_04_readfile1, readfile2 = DRF_04_readfile2, type = "rna", input_format = "gzFASTQ", phredOffset = 33, nthreads = 20, output_file = "./data/input/reads/bams/Kpn_518_01.BAM")
+
+DRF_05_readfile1 <- dir(path = "./data/input/reads/fastq", pattern = "N_518_2_1.fq.gz", full.names = T, recursive = F)
+DRF_05_readfile2 <- dir(path = "./data/input/reads/fastq", pattern = "N_518_2_2.fq.gz", full.names = T, recursive = F)
+DRF_05_align.stat <- align(index = "ref_index", readfile1 = DRF_05_readfile1, readfile2 = DRF_05_readfile2, type = "rna", input_format = "gzFASTQ", phredOffset = 33, nthreads = 20, output_file = "./data/input/reads/bams/Kpn_518_02.BAM")
+
+DRF_06_readfile1 <- dir(path = "./data/input/reads/fastq", pattern = "N_518_3_1.fq.gz", full.names = T, recursive = F)
+DRF_06_readfile2 <- dir(path = "./data/input/reads/fastq", pattern = "N_518_3_2.fq.gz", full.names = T, recursive = F)
+DRF_06_align.stat <- align(index = "ref_index", readfile1 = DRF_06_readfile1, readfile2 = DRF_06_readfile2, type = "rna", input_format = "gzFASTQ", phredOffset = 33, nthreads = 20, output_file = "./data/input/reads/bams/Kpn_518_03.BAM")
+
+DRF_07_readfile1 <- dir(path = "./data/input/reads/fastq", pattern = "N_1802_1_1.fq.gz", full.names = T, recursive = F)
+DRF_07_readfile2 <- dir(path = "./data/input/reads/fastq", pattern = "N_1802_1_2.fq.gz", full.names = T, recursive = F)
+DRF_07_align.stat <- align(index = "ref_index", readfile1 = DRF_07_readfile1, readfile2 = DRF_07_readfile2, type = "rna", input_format = "gzFASTQ", phredOffset = 33, nthreads = 20, output_file = "./data/input/reads/bams/NEOC3_1802_01.BAM")
+
+DRF_08_readfile1 <- dir(path = "./data/input/reads/fastq", pattern = "N_1803_1_1.fq.gz", full.names = T, recursive = F)
+DRF_08_readfile2 <- dir(path = "./data/input/reads/fastq", pattern = "N_1803_1_2.fq.gz", full.names = T, recursive = F)
+DRF_08_align.stat <- align(index = "ref_index", readfile1 = DRF_08_readfile1, readfile2 = DRF_08_readfile2, type = "rna", input_format = "gzFASTQ", phredOffset = 33, nthreads = 20, output_file = "./data/input/reads/bams/NEOC4_1803_01.BAM")
+
+DRF_09_readfile1 <- dir(path = "./data/input/reads/fastq", pattern = "N_1829_1_1.fq.gz", full.names = T, recursive = F)
+DRF_09_readfile2 <- dir(path = "./data/input/reads/fastq", pattern = "N_1829_1_2.fq.gz", full.names = T, recursive = F)
+DRF_09_align.stat <- align(index = "ref_index", readfile1 = DRF_09_readfile1, readfile2 = DRF_09_readfile2, type = "rna", input_format = "gzFASTQ", phredOffset = 33, nthreads = 20, output_file = "./data/input/reads/bams/NEOC7_1829_01.BAM")
+
+```
+
+```{r}
+library(Rsubread)
+
+bams <- dir(path = "./data/input/reads/bams", pattern = "*.BAM$", full.names = T, recursive = F)
+ann <- MG1655_annotations
+fc_SE <- featureCounts(files = bams, annot.ext = ann, isPairedEnd = T, nthreads = 20)
+write.csv(fc_SE$counts, "./data/output/counts.csv", quote = F, row.names = T)
+write.csv(fc_SE$stat, "./data/output/stats.csv", quote = F, row.names = T)
+```
+
+```{r}
+library(edgeR)
+
+counts <- read.csv("./data/output/counts.csv", header = T)
+colnames(counts) <- c("X","EGFP_1077_01", "EGFP_1077_02", "EGFP_1077_03", "Kpn_518_01", "Kpn_518_02", "Kpn_518_03","NEOC3_1802_01", "NEOC4_1803_01", "NEOC7_1829_01")
+
+x <- counts[ , 2:10]
+counts[is.na(counts)] <- "Misc"
+rownames(x) <- counts[ , 1]
+
+group <- factor(c("1", "1", "1", "2", "2", "2", "3", "4", "5"))
+
+y <- DGEList(counts = x, group = group)
+design <- model.matrix(~0 + group, data = y$samples)
+keep <- filterByExpr(y, design, min.count = 0)
+keep_df <- data.frame(keep)
+y <- y[keep, , keep.lib.sizes = F]
+#y <- calcNormFactors(y)
+y <- normLibSizes(y)
+y <- estimateCommonDisp(y, design = group)
+y$genes <- data.frame(fc_SE$annotation$Length[keep_df$keep])
+
+write.csv(cpm(y, log = T), "./data/output/log_cpm_counts.csv", quote = F, row.names = T)
+
+log_cpm_data <- cpm(y, log = T)
+
+rpkm <- rpkm(y)
+write.csv(rpkm, "./data/output/RPKM.csv", quote = F, row.names = T)
+log_rpkm <- rpkm(y, log = T)
+write.csv(log_rpkm, "./data/output/log_RPKM.csv", quote = F, row.names = T)
+group_rpkm <- rpkmByGroup(y, group = group)
+write.csv(group_rpkm, "./data/output/grouped_RPKM.csv", quote = F, row.names = T)
+log_group_rpkm <- rpkmByGroup(y, group = group , log = T)
+write.csv(log_group_rpkm, "./data/output/log_grouped_RPKM.csv", quote = F, row.names = T)
+
+cpm <- cpm(y)
+write.csv(cpm, "./data/output/CPM.csv", quote = F, row.names = T)
+log_cpm <- cpm(y, log = T)
+write.csv(log_cpm, "./data/output/log_CPM.csv", quote = F, row.names = T)
+group_cpm <- cpmByGroup(y, group = group)
+write.csv(group_cpm, "./data/output/grouped_CPM.csv", quote = F, row.names = T)
+log_group_cpm <- cpmByGroup(y, group = group , log =T)
+write.csv(log_group_cpm, "./data/output/log_grouped_CPM.csv", quote = F, row.names = T)
+```
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(ggthemes)
+
+mds <- plotMDS(log_cpm_data, gene.selection = "common")
+
+mds_plot_data <- data.frame(x = mds$x, y = mds$y, Group = factor(c("EGFP_1077_01", "EGFP_1077_02", "EGFP_1077_03", "Kpn_518_01", "Kpn_518_02", "Kpn_518_03","NEOC3_1802_01", "NEOC4_1803_01", "NEOC7_1829_01")))
+
+row.names(mds_plot_data) <- c("EGFP_1077_01", "EGFP_1077_02", "EGFP_1077_03", "Kpn_518_01", "Kpn_518_02", "Kpn_518_03","NEOC3_1802_01", "NEOC4_1803_01", "NEOC7_1829_01")
+
+mds_plot_data_colors <- c("1" = "red", "2" = "blue", "3" = "darkgreen", "4" = "orange", "5" = "maroon")
+
+tiff("./data/output/pca_plot.tif", res = 300, width = 10, height = 5, units = "in")
+ggplot(data = mds_plot_data, aes(x = x, y = y))+
+  xlab("Principal Component 1 (33%)")+
+  ylab("Principal Component 2 (26%)")+
+  #xlim(-0.8,0.8)+
+  #ylim(-0.6,0.6)+
+  ggtitle("PCA plot of distances between gene expression profiles")+
+  geom_point(shape = 21, color = "black", size = 4, stroke = 1, aes(fill = group))+
+  scale_fill_manual(values = mds_plot_data_colors)+
+  geom_text_repel(data = mds_plot_data, aes(x = x, y = y), label = rownames(mds_plot_data), min.segment.length = 0, max.overlaps = 20, box.padding = 0.7, direction = "both", point.padding = 0)+
+  theme_bw()+
+  theme(aspect.ratio = 1/2, plot.title = element_text(hjust = 0.5, face = "bold", size = 18), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.text.x = element_text(color="black", size = 11), axis.text.y = element_text(color="black", size = 11), axis.title.y = element_text(face = "bold", size = 15), axis.title.x = element_text(face = "bold", size = 15), axis.ticks = element_line(color = "black"), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), legend.position = "none")
+dev.off()
+```
+
+```{r}
+library(pheatmap)
+library(edgeR)
+library(viridisLite)
+library(viridis)
+
+cor.matrix <- cor(log_cpm_data, method = "pearson")
+
+tiff("./data/output/correlation_heatmap.tif", res = 300, width = 14, height = 25, units = "in")
+pheatmap(cor.matrix, color = viridis(10), cluster_rows = F, cluster_cols = F, cellwidth = 50, cellheight = 50, main = "Pearson Correlation", legend = F, border_color = "black", display_numbers = T, number_color = "red", fontsize = 15, angle_col = 315)
+dev.off()
+```
+
+```{r}
+library(edgeR)
+library(dplyr)
+
+fit <- glmQLFit(y, design)
+
+EGFP_v_KpnNEO <- glmQLFTest(fit, contrast = c(-1, 1, 0, 0, 0))
+
+dge_EGFP_v_KpnNEO <- topTags(EGFP_v_KpnNEO, n = 10000, adjust.method = "BH", sort.by = "PValue", p.value = 1)$table
+
+dge_EGFP_v_KpnNEO$GeneID <-  rownames(dge_EGFP_v_KpnNEO)
+
+dge_EGFP_v_KpnNEO <- dge_EGFP_v_KpnNEO %>% left_join(MG1655_official_reference,by="GeneID")
+
+dge_EGFP_v_KpnNEO[is.na(dge_EGFP_v_KpnNEO$gene),]$gene <- "N/A"
+
+dge_EGFP_v_KpnNEO$gene <- gsub("'", '', dge_EGFP_v_KpnNEO$gene)
+dge_EGFP_v_KpnNEO$product <- gsub("'", '', dge_EGFP_v_KpnNEO$product)
+
+dge_EGFP_v_KpnNEO$info <- paste0("Accession: ", dge_EGFP_v_KpnNEO$chr, " | gene: ", dge_EGFP_v_KpnNEO$gene, " | product: ", dge_EGFP_v_KpnNEO$product, " | locus_tag: ", dge_EGFP_v_KpnNEO$GeneID, " | logFC: ", dge_EGFP_v_KpnNEO$logFC, " | FDR: ", dge_EGFP_v_KpnNEO$FDR)
+
+write.csv(dge_EGFP_v_KpnNEO, "./data/output/dge_EGFP_v_KpnNEO.csv", quote = F, row.names = T)
+write.csv(dge_EGFP_v_KpnNEO[abs(dge_EGFP_v_KpnNEO$logFC) >= 1 & dge_EGFP_v_KpnNEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_KpnNEO_hits.csv" , quote = F, row.names = T)
+write.csv(dge_EGFP_v_KpnNEO[dge_EGFP_v_KpnNEO$logFC >=1 & dge_EGFP_v_KpnNEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_KpnNEO_hits_up.csv" , quote = F, row.names = T)
+write.csv(dge_EGFP_v_KpnNEO[dge_EGFP_v_KpnNEO$logFC <=-1 & dge_EGFP_v_KpnNEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_KpnNEO_hits_down.csv" , quote = F, row.names = T)
+
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(ggrepel)
+library(ggiraph)
+library(htmltools)
+library(htmlwidgets)
+
+EGFP_v_KpnNEO <- ggplot(subset(dge_EGFP_v_KpnNEO), aes(logFC, -log10(FDR)))+
+  geom_point_interactive(shape = 19, size = 1, color = "gray70", aes(tooltip = info, data_id = info))+
+  geom_vline(xintercept = 2, linetype = "dashed", color = "gray40")+
+  geom_vline(xintercept = -2, linetype = "dashed", color = "gray40")+
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "gray40")+
+  geom_point_interactive(data = subset(dge_EGFP_v_KpnNEO)[subset(dge_EGFP_v_KpnNEO)$logFC >=2 & subset(dge_EGFP_v_KpnNEO)$FDR < 0.05, ], shape = 21, size = 1, aes(fill = chr))+
+  geom_point_interactive(data = subset(dge_EGFP_v_KpnNEO)[subset(dge_EGFP_v_KpnNEO)$logFC <=-2 & subset(dge_EGFP_v_KpnNEO)$FDR < 0.05, ], shape = 21, size = 1, aes(fill = chr))+
+  scale_fill_manual(guide = "legend", name = "", values = c("lightblue", "darkgreen", "maroon","orange")) +
+  ggtitle("EGFP vs. KpnNEO")+
+  ylab(bquote(-log[10](FDR)))+
+  xlab(bquote(log[2]("expression fold change")))+
+  theme(aspect.ratio =  1/2, legend.position = "right", plot.title = element_text(hjust = 0.5, face = "bold", size = 12), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_rect(fill = "white", colour = "black"), text = element_text(size = 12), axis.title.y = element_text(face = "bold", size = 12), axis.title.x = element_text(face = "bold", size = 12)) 
+
+EGFP_v_KpnNEO_interactive <- girafe(ggobj = EGFP_v_KpnNEO)
+saveWidget(EGFP_v_KpnNEO_interactive, "./data/output/EGFP_v_KpnNEO_interactive.html")
+
+```
+
+```{r}
+library(edgeR)
+library(dplyr)
+
+fit <- glmQLFit(y, design)
+
+EGFP_v_c3_1NEO <- glmQLFTest(fit, contrast = c(-1, 0, 1, 0, 0))
+
+dge_EGFP_v_c3_1NEO <- topTags(EGFP_v_c3_1NEO, n = 10000, adjust.method = "BH", sort.by = "PValue", p.value = 1)$table
+
+dge_EGFP_v_c3_1NEO$GeneID <-  rownames(dge_EGFP_v_c3_1NEO)
+
+dge_EGFP_v_c3_1NEO <- dge_EGFP_v_c3_1NEO %>% left_join(MG1655_official_reference,by="GeneID")
+
+dge_EGFP_v_c3_1NEO[is.na(dge_EGFP_v_c3_1NEO$gene),]$gene <- "N/A"
+
+dge_EGFP_v_c3_1NEO$gene <- gsub("'", '', dge_EGFP_v_c3_1NEO$gene)
+dge_EGFP_v_c3_1NEO$product <- gsub("'", '', dge_EGFP_v_c3_1NEO$product)
+
+dge_EGFP_v_c3_1NEO$info <- paste0("Accession: ", dge_EGFP_v_c3_1NEO$chr, " | gene: ", dge_EGFP_v_c3_1NEO$gene, " | product: ", dge_EGFP_v_c3_1NEO$product, " | locus_tag: ", dge_EGFP_v_c3_1NEO$GeneID, " | logFC: ", dge_EGFP_v_c3_1NEO$logFC, " | FDR: ", dge_EGFP_v_c3_1NEO$FDR)
+
+write.csv(dge_EGFP_v_c3_1NEO, "./data/output/dge_EGFP_v_c3_1NEO.csv", quote = F, row.names = T)
+write.csv(dge_EGFP_v_c3_1NEO[abs(dge_EGFP_v_c3_1NEO$logFC) >= 1 & dge_EGFP_v_c3_1NEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_c3_1NEO_hits.csv" , quote = F, row.names = T)
+write.csv(dge_EGFP_v_c3_1NEO[dge_EGFP_v_c3_1NEO$logFC >=1 & dge_EGFP_v_c3_1NEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_c3_1NEO_hits_up.csv" , quote = F, row.names = T)
+write.csv(dge_EGFP_v_c3_1NEO[dge_EGFP_v_c3_1NEO$logFC <=-1 & dge_EGFP_v_c3_1NEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_c3_1NEO_hits_down.csv" , quote = F, row.names = T)
+
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(ggrepel)
+library(ggiraph)
+library(htmltools)
+library(htmlwidgets)
+
+EGFP_v_c3_1NEO <- ggplot(subset(dge_EGFP_v_c3_1NEO), aes(logFC, -log10(FDR)))+
+  geom_point_interactive(shape = 19, size = 1, color = "gray70", aes(tooltip = info, data_id = info))+
+  geom_vline(xintercept = 2, linetype = "dashed", color = "gray40")+
+  geom_vline(xintercept = -2, linetype = "dashed", color = "gray40")+
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "gray40")+
+  geom_point_interactive(data = subset(dge_EGFP_v_c3_1NEO)[subset(dge_EGFP_v_c3_1NEO)$logFC >=2 & subset(dge_EGFP_v_c3_1NEO)$FDR < 0.05, ], shape = 21, size = 1, aes(fill = chr))+
+  geom_point_interactive(data = subset(dge_EGFP_v_c3_1NEO)[subset(dge_EGFP_v_c3_1NEO)$logFC <=-2 & subset(dge_EGFP_v_c3_1NEO)$FDR < 0.05, ], shape = 21, size = 1, aes(fill = chr))+
+  scale_fill_manual(guide = "legend", name = "", values = c("lightblue", "darkgreen", "maroon","orange")) +
+  ggtitle("EGFP vs. C3.1bNEO")+
+  ylab(bquote(-log[10](FDR)))+
+  xlab(bquote(log[2]("expression fold change")))+
+  theme(aspect.ratio =  1/2, legend.position = "right", plot.title = element_text(hjust = 0.5, face = "bold", size = 12), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_rect(fill = "white", colour = "black"), text = element_text(size = 12), axis.title.y = element_text(face = "bold", size = 12), axis.title.x = element_text(face = "bold", size = 12)) 
+
+EGFP_v_c3_1NEO_interactive <- girafe(ggobj = EGFP_v_c3_1NEO)
+saveWidget(EGFP_v_c3_1NEO_interactive, "./data/output/EGFP_v_c3_1NEO_interactive.html")
+
+```
+
+```{r}
+library(edgeR)
+library(dplyr)
+
+fit <- glmQLFit(y, design)
+
+EGFP_v_c4_1NEO <- glmQLFTest(fit, contrast = c(-1, 0, 0, 1, 0))
+
+dge_EGFP_v_c4_1NEO <- topTags(EGFP_v_c4_1NEO, n = 10000, adjust.method = "BH", sort.by = "PValue", p.value = 1)$table
+
+dge_EGFP_v_c4_1NEO$GeneID <-  rownames(dge_EGFP_v_c4_1NEO)
+
+dge_EGFP_v_c4_1NEO <- dge_EGFP_v_c4_1NEO %>% left_join(MG1655_official_reference,by="GeneID")
+
+dge_EGFP_v_c4_1NEO[is.na(dge_EGFP_v_c4_1NEO$gene),]$gene <- "N/A"
+
+dge_EGFP_v_c4_1NEO$gene <- gsub("'", '', dge_EGFP_v_c4_1NEO$gene)
+dge_EGFP_v_c4_1NEO$product <- gsub("'", '', dge_EGFP_v_c4_1NEO$product)
+
+dge_EGFP_v_c4_1NEO$info <- paste0("Accession: ", dge_EGFP_v_c4_1NEO$chr, " | gene: ", dge_EGFP_v_c4_1NEO$gene, " | product: ", dge_EGFP_v_c4_1NEO$product, " | locus_tag: ", dge_EGFP_v_c4_1NEO$GeneID, " | logFC: ", dge_EGFP_v_c4_1NEO$logFC, " | FDR: ", dge_EGFP_v_c4_1NEO$FDR)
+
+write.csv(dge_EGFP_v_c4_1NEO, "./data/output/dge_EGFP_v_c4_1NEO.csv", quote = F, row.names = T)
+write.csv(dge_EGFP_v_c4_1NEO[abs(dge_EGFP_v_c4_1NEO$logFC) >= 1 & dge_EGFP_v_c4_1NEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_c4_1NEO_hits.csv" , quote = F, row.names = T)
+write.csv(dge_EGFP_v_c4_1NEO[dge_EGFP_v_c4_1NEO$logFC >=1 & dge_EGFP_v_c4_1NEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_c4_1NEO_hits_up.csv" , quote = F, row.names = T)
+write.csv(dge_EGFP_v_c4_1NEO[dge_EGFP_v_c4_1NEO$logFC <=-1 & dge_EGFP_v_c4_1NEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_c4_1NEO_hits_down.csv" , quote = F, row.names = T)
+
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(ggrepel)
+library(ggiraph)
+library(htmltools)
+library(htmlwidgets)
+
+EGFP_v_c4_1NEO <- ggplot(subset(dge_EGFP_v_c4_1NEO), aes(logFC, -log10(FDR)))+
+  geom_point_interactive(shape = 19, size = 1, color = "gray70", aes(tooltip = info, data_id = info))+
+  geom_vline(xintercept = 2, linetype = "dashed", color = "gray40")+
+  geom_vline(xintercept = -2, linetype = "dashed", color = "gray40")+
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "gray40")+
+  geom_point_interactive(data = subset(dge_EGFP_v_c4_1NEO)[subset(dge_EGFP_v_c4_1NEO)$logFC >=2 & subset(dge_EGFP_v_c4_1NEO)$FDR < 0.05, ], shape = 21, size = 1, aes(fill = chr))+
+  geom_point_interactive(data = subset(dge_EGFP_v_c4_1NEO)[subset(dge_EGFP_v_c4_1NEO)$logFC <=-2 & subset(dge_EGFP_v_c4_1NEO)$FDR < 0.05, ], shape = 21, size = 1, aes(fill = chr))+
+  scale_fill_manual(guide = "legend", name = "", values = c("lightblue", "darkgreen", "maroon","orange")) +
+  ggtitle("EGFP vs. C4.1bNEO")+
+  ylab(bquote(-log[10](FDR)))+
+  xlab(bquote(log[2]("expression fold change")))+
+  theme(aspect.ratio =  1/2, legend.position = "right", plot.title = element_text(hjust = 0.5, face = "bold", size = 12), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_rect(fill = "white", colour = "black"), text = element_text(size = 12), axis.title.y = element_text(face = "bold", size = 12), axis.title.x = element_text(face = "bold", size = 12)) 
+
+EGFP_v_c4_1NEO_interactive <- girafe(ggobj = EGFP_v_c4_1NEO)
+saveWidget(EGFP_v_c4_1NEO_interactive, "./data/output/EGFP_v_c4_1NEO_interactive.html")
+
+```
+
+```{r}
+library(edgeR)
+library(dplyr)
+
+fit <- glmQLFit(y, design)
+
+EGFP_v_c7_6NEO <- glmQLFTest(fit, contrast = c(-1, 0, 0, 0, 1))
+
+dge_EGFP_v_c7_6NEO <- topTags(EGFP_v_c7_6NEO, n = 10000, adjust.method = "BH", sort.by = "PValue", p.value = 1)$table
+
+dge_EGFP_v_c7_6NEO$GeneID <-  rownames(dge_EGFP_v_c7_6NEO)
+
+dge_EGFP_v_c7_6NEO <- dge_EGFP_v_c7_6NEO %>% left_join(MG1655_official_reference,by="GeneID")
+
+dge_EGFP_v_c7_6NEO[is.na(dge_EGFP_v_c7_6NEO$gene),]$gene <- "N/A"
+
+dge_EGFP_v_c7_6NEO$gene <- gsub("'", '', dge_EGFP_v_c7_6NEO$gene)
+dge_EGFP_v_c7_6NEO$product <- gsub("'", '', dge_EGFP_v_c7_6NEO$product)
+
+dge_EGFP_v_c7_6NEO$info <- paste0("Accession: ", dge_EGFP_v_c7_6NEO$chr, " | gene: ", dge_EGFP_v_c7_6NEO$gene, " | product: ", dge_EGFP_v_c7_6NEO$product, " | locus_tag: ", dge_EGFP_v_c7_6NEO$GeneID, " | logFC: ", dge_EGFP_v_c7_6NEO$logFC, " | FDR: ", dge_EGFP_v_c7_6NEO$FDR)
+
+write.csv(dge_EGFP_v_c7_6NEO, "./data/output/dge_EGFP_v_c7_6NEO.csv", quote = F, row.names = T)
+write.csv(dge_EGFP_v_c7_6NEO[abs(dge_EGFP_v_c7_6NEO$logFC) >= 1 & dge_EGFP_v_c7_6NEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_c7_6NEO_hits.csv" , quote = F, row.names = T)
+write.csv(dge_EGFP_v_c7_6NEO[dge_EGFP_v_c7_6NEO$logFC >=1 & dge_EGFP_v_c7_6NEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_c7_6NEO_hits_up.csv" , quote = F, row.names = T)
+write.csv(dge_EGFP_v_c7_6NEO[dge_EGFP_v_c7_6NEO$logFC <=-1 & dge_EGFP_v_c7_6NEO$FDR < 0.05, ], "./data/output/dge_EGFP_v_c7_6NEO_hits_down.csv" , quote = F, row.names = T)
+
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(ggrepel)
+library(ggiraph)
+library(htmltools)
+library(htmlwidgets)
+
+EGFP_v_c7_6NEO <- ggplot(subset(dge_EGFP_v_c7_6NEO), aes(logFC, -log10(FDR)))+
+  geom_point_interactive(shape = 19, size = 1, color = "gray70", aes(tooltip = info, data_id = info))+
+  geom_vline(xintercept = 2, linetype = "dashed", color = "gray40")+
+  geom_vline(xintercept = -2, linetype = "dashed", color = "gray40")+
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "gray40")+
+  geom_point_interactive(data = subset(dge_EGFP_v_c7_6NEO)[subset(dge_EGFP_v_c7_6NEO)$logFC >=2 & subset(dge_EGFP_v_c7_6NEO)$FDR < 0.05, ], shape = 21, size = 1, aes(fill = chr))+
+  geom_point_interactive(data = subset(dge_EGFP_v_c7_6NEO)[subset(dge_EGFP_v_c7_6NEO)$logFC <=-2 & subset(dge_EGFP_v_c7_6NEO)$FDR < 0.05, ], shape = 21, size = 1, aes(fill = chr))+
+  scale_fill_manual(guide = "legend", name = "", values = c("lightblue", "darkgreen", "maroon","orange")) +
+  ggtitle("EGFP vs. C7.6bNEO")+
+  ylab(bquote(-log[10](FDR)))+
+  xlab(bquote(log[2]("expression fold change")))+
+  theme(aspect.ratio =  1/2, legend.position = "right", plot.title = element_text(hjust = 0.5, face = "bold", size = 12), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_rect(fill = "white", colour = "black"), text = element_text(size = 12), axis.title.y = element_text(face = "bold", size = 12), axis.title.x = element_text(face = "bold", size = 12)) 
+
+EGFP_v_c7_6NEO_interactive <- girafe(ggobj = EGFP_v_c7_6NEO)
+saveWidget(EGFP_v_c7_6NEO_interactive, "./data/output/EGFP_v_c4_1NEO_interactive.html")
+
+```
+
+```{r}
+library(edgeR)
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(ggiraph)
+library(htmlwidgets)
+
+# ============================================================
+# Output directory and thresholds
+# ============================================================
+
+output_dir <- "./data/output"
+
+dir.create(
+  output_dir,
+  recursive = TRUE,
+  showWarnings = FALSE
+)
+
+hit_logFC_threshold <- 1
+plot_logFC_threshold <- 4
+FDR_threshold <- 0.05
+
+# ============================================================
+# Fit the edgeR model once
+# ============================================================
+
+fit <- glmQLFit(y, design)
+
+# Positive logFC means higher expression in the NEO condition
+# relative to EGFP because each contrast is NEO - EGFP.
+
+contrast_list <- list(
+  KpnNEO = c(-1, 1, 0, 0, 0),
+  C3.1bNEO = c(-1, 0, 1, 0, 0),
+  C4.1bNEO = c(-1, 0, 0, 1, 0),
+  C7.6bNEO = c(-1, 0, 0, 0, 1)
+)
+
+file_name_list <- c(
+  KpnNEO = "KpnNEO",
+  C3.1bNEO = "c3_1NEO",
+  C4.1bNEO = "c4_1NEO",
+  C7.6bNEO = "c7_6NEO"
+)
+
+# ============================================================
+# Function to run one contrast, annotate results, and save CSVs
+# ============================================================
+
+run_dge_contrast <- function(
+    fit,
+    contrast_vector,
+    comparison_name,
+    file_name,
+    reference_table,
+    output_dir,
+    hit_logFC_threshold = 1,
+    FDR_threshold = 0.05
+) {
+
+  qlf_test <- glmQLFTest(
+    fit,
+    contrast = contrast_vector
+  )
+
+  dge_table <- topTags(
+    qlf_test,
+    n = Inf,
+    adjust.method = "BH",
+    sort.by = "PValue",
+    p.value = 1
+  )$table
+
+  dge_table <- dge_table %>%
+    rownames_to_column("GeneID") %>%
+    left_join(
+      reference_table,
+      by = "GeneID"
+    ) %>%
+    mutate(
+      NEO = comparison_name,
+
+      gene = if_else(
+        is.na(gene) | gene == "",
+        "N/A",
+        as.character(gene)
+      ),
+
+      product = if_else(
+        is.na(product) | product == "",
+        "N/A",
+        as.character(product)
+      ),
+
+      chr = if_else(
+        is.na(chr) | chr == "",
+        "N/A",
+        as.character(chr)
+      ),
+
+      gene = gsub(
+        "'",
+        "",
+        gene
+      ),
+
+      product = gsub(
+        "'",
+        "",
+        product
+      ),
+
+      # Avoid Inf when FDR is exactly zero
+      FDR_plot = pmax(
+        FDR,
+        .Machine$double.xmin
+      ),
+
+      info = paste0(
+        "NEO: ", NEO,
+        " | Accession: ", chr,
+        " | gene: ", gene,
+        " | product: ", product,
+        " | locus_tag: ", GeneID,
+        " | logFC: ", round(logFC, 4),
+        " | FDR: ", signif(FDR, 4)
+      ),
+
+      # The same GeneID occurs in all four comparisons,
+      # so data_id must include the comparison name.
+      point_id = paste(
+        NEO,
+        GeneID,
+        sep = "_"
+      )
+    )
+
+  # Complete result table
+  write.csv(
+    dge_table,
+    file.path(
+      output_dir,
+      paste0(
+        "dge_EGFP_v_",
+        file_name,
+        ".csv"
+      )
+    ),
+    quote = FALSE,
+    row.names = FALSE
+  )
+
+  # All differentially expressed hits
+  write.csv(
+    dge_table %>%
+      filter(
+        abs(logFC) >= hit_logFC_threshold,
+        FDR < FDR_threshold
+      ),
+    file.path(
+      output_dir,
+      paste0(
+        "dge_EGFP_v_",
+        file_name,
+        "_hits.csv"
+      )
+    ),
+    quote = FALSE,
+    row.names = FALSE
+  )
+
+  # Upregulated hits
+  write.csv(
+    dge_table %>%
+      filter(
+        logFC >= hit_logFC_threshold,
+        FDR < FDR_threshold
+      ),
+    file.path(
+      output_dir,
+      paste0(
+        "dge_EGFP_v_",
+        file_name,
+        "_hits_up.csv"
+      )
+    ),
+    quote = FALSE,
+    row.names = FALSE
+  )
+
+  # Downregulated hits
+  write.csv(
+    dge_table %>%
+      filter(
+        logFC <= -hit_logFC_threshold,
+        FDR < FDR_threshold
+      ),
+    file.path(
+      output_dir,
+      paste0(
+        "dge_EGFP_v_",
+        file_name,
+        "_hits_down.csv"
+      )
+    ),
+    quote = FALSE,
+    row.names = FALSE
+  )
+
+  return(dge_table)
+}
+
+# ============================================================
+# Run all four differential-expression comparisons
+# ============================================================
+
+dge_results <- lapply(
+  names(contrast_list),
+  function(comparison_name) {
+
+    run_dge_contrast(
+      fit = fit,
+      contrast_vector = contrast_list[[comparison_name]],
+      comparison_name = comparison_name,
+      file_name = file_name_list[[comparison_name]],
+      reference_table = MG1655_official_reference,
+      output_dir = output_dir,
+      hit_logFC_threshold = hit_logFC_threshold,
+      FDR_threshold = FDR_threshold
+    )
+  }
+)
+
+names(dge_results) <- names(contrast_list)
+
+# Preserve the four individual dataframe names used previously
+dge_EGFP_v_KpnNEO <- dge_results[["KpnNEO"]]
+dge_EGFP_v_c3_1NEO <- dge_results[["C3.1bNEO"]]
+dge_EGFP_v_c4_1NEO <- dge_results[["C4.1bNEO"]]
+dge_EGFP_v_c7_6NEO <- dge_results[["C7.6bNEO"]]
+
+# ============================================================
+# Combine all four datasets
+# ============================================================
+
+dge_all_NEOs <- bind_rows(
+  dge_results
+) %>%
+  mutate(
+    NEO = factor(
+      NEO,
+      levels = c(
+        "KpnNEO",
+        "C3.1bNEO",
+        "C4.1bNEO",
+        "C7.6bNEO"
+      )
+    ),
+
+    Significant = (
+      abs(logFC) >= plot_logFC_threshold &
+        FDR < FDR_threshold
+    ),
+
+    Direction = case_when(
+      Significant & logFC >= plot_logFC_threshold ~
+        "Upregulated",
+
+      Significant & logFC <= -plot_logFC_threshold ~
+        "Downregulated",
+
+      TRUE ~
+        "Not significant"
+    )
+  )
+
+write.csv(
+  dge_all_NEOs,
+  file.path(
+    output_dir,
+    "dge_all_NEOs_vs_EGFP.csv"
+  ),
+  quote = FALSE,
+  row.names = FALSE
+)
+
+# Separate background and significant points
+dge_all_NEOs_background <- dge_all_NEOs %>%
+  filter(!Significant)
+
+dge_all_NEOs_significant <- dge_all_NEOs %>%
+  filter(Significant)
+
+# ============================================================
+# Single interactive volcano plot containing all four datasets
+# ============================================================
+
+all_NEOs_volcano <- ggplot(
+  dge_all_NEOs,
+  aes(
+    x = logFC,
+    y = -log10(FDR_plot)
+  )
+) +
+
+  # All nonsignificant points
+  geom_point_interactive(
+    data = dge_all_NEOs_background,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 19,
+    size = 1,
+    color = "gray70",
+    alpha = 0.35
+  ) +
+
+  # Fold-change thresholds
+  geom_vline(
+    xintercept = plot_logFC_threshold,
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  geom_vline(
+    xintercept = -plot_logFC_threshold,
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # FDR threshold
+  geom_hline(
+    yintercept = -log10(FDR_threshold),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # Significant points colored by NEO comparison
+  geom_point_interactive(
+    data = dge_all_NEOs_significant,
+    aes(
+      fill = NEO,
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 1.7,
+    color = "black",
+    stroke = 0.25,
+    alpha = 0.85
+  ) +
+
+  scale_fill_manual(
+    guide = "legend",
+    name = "",
+    values = c(
+      "KpnNEO" = "lightblue",
+      "C3.1bNEO" = "darkgreen",
+      "C4.1bNEO" = "maroon",
+      "C7.6bNEO" = "orange"
+    )
+  ) +
+
+  ggtitle(
+    "All NEOs vs. EGFP"
+  ) +
+
+  ylab(
+    bquote(-log[10](FDR))
+  ) +
+
+  xlab(
+    bquote(log[2]("expression fold change"))
+  ) +
+
+  theme(
+    aspect.ratio = 1 / 2,
+
+    legend.position = "right",
+
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold",
+      size = 12
+    ),
+
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+
+    panel.background = element_rect(
+      fill = "white",
+      colour = "black"
+    ),
+
+    text = element_text(
+      size = 12
+    ),
+
+    axis.title.y = element_text(
+      face = "bold",
+      size = 12
+    ),
+
+    axis.title.x = element_text(
+      face = "bold",
+      size = 12
+    )
+  )
+
+print(all_NEOs_volcano)
+
+# ============================================================
+# Save static PDF and PNG versions
+# ============================================================
+
+ggsave(
+  filename = file.path(
+    output_dir,
+    "all_NEOs_vs_EGFP_volcano.pdf"
+  ),
+  plot = all_NEOs_volcano,
+  width = 9,
+  height = 5.5,
+  units = "in"
+)
+
+ggsave(
+  filename = file.path(
+    output_dir,
+    "all_NEOs_vs_EGFP_volcano.png"
+  ),
+  plot = all_NEOs_volcano,
+  width = 9,
+  height = 5.5,
+  units = "in",
+  dpi = 600
+)
+
+# ============================================================
+# Create and save the interactive HTML plot
+# ============================================================
+
+all_NEOs_volcano_interactive <- girafe(
+  ggobj = all_NEOs_volcano,
+  width_svg = 9,
+  height_svg = 5.5
+)
+
+saveWidget(
+  all_NEOs_volcano_interactive,
+  file.path(
+    output_dir,
+    "all_NEOs_vs_EGFP_volcano_interactive.html"
+  ),
+  selfcontained = TRUE
+)
+```
+```{r}
+library(edgeR)
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(ggiraph)
+library(stringr)
+
+# ============================================================
+# Settings
+# ============================================================
+
+annotation_file <- "./data/input/Annotations.csv"
+
+plot_logFC_threshold <- 2
+FDR_threshold <- 0.05
+
+NEO_levels <- c(
+  "KpnNEO",
+  "C3.1bNEO",
+  "C4.1bNEO",
+  "C7.6bNEO"
+)
+
+# ============================================================
+# Check required objects
+# ============================================================
+
+required_objects <- c(
+  "y",
+  "design"
+)
+
+missing_objects <- required_objects[
+  !vapply(
+    required_objects,
+    exists,
+    logical(1),
+    inherits = TRUE
+  )
+]
+
+if (length(missing_objects) > 0) {
+  stop(
+    paste0(
+      "Missing required object(s): ",
+      paste(
+        missing_objects,
+        collapse = ", "
+      )
+    )
+  )
+}
+
+if (!file.exists(annotation_file)) {
+  stop(
+    paste0(
+      "Annotation file was not found: ",
+      annotation_file
+    )
+  )
+}
+
+# ============================================================
+# Read the annotation file
+#
+# This is a headerless nine-column GFF-style CSV file.
+# ============================================================
+
+annotation_raw <- read.csv(
+  annotation_file,
+  header = FALSE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE,
+  quote = "\"",
+  comment.char = ""
+)
+
+if (ncol(annotation_raw) != 9) {
+  stop(
+    paste0(
+      "The annotation file should contain 9 columns, but ",
+      ncol(annotation_raw),
+      " columns were detected."
+    )
+  )
+}
+
+colnames(annotation_raw) <- c(
+  "seqid",
+  "description",
+  "feature_type",
+  "start",
+  "end",
+  "score",
+  "strand",
+  "phase",
+  "attributes"
+)
+
+# ============================================================
+# Extract a named attribute from the GFF attributes column
+# ============================================================
+
+extract_attribute <- function(attributes, key) {
+
+  attributes <- as.character(
+    attributes
+  )
+
+  pattern <- paste0(
+    "(?:^|;)",
+    key,
+    "=([^;]+)"
+  )
+
+  value <- str_match(
+    attributes,
+    pattern
+  )[, 2]
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2C",
+      ignore_case = TRUE
+    ),
+    ","
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%3B",
+      ignore_case = TRUE
+    ),
+    ";"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%28",
+      ignore_case = TRUE
+    ),
+    "("
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%29",
+      ignore_case = TRUE
+    ),
+    ")"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2B",
+      ignore_case = TRUE
+    ),
+    "+"
+  )
+
+  value <- str_replace_all(
+    value,
+    "\u00A0",
+    " "
+  )
+
+  str_squish(
+    value
+  )
+}
+
+# ============================================================
+# Parse structured annotation fields
+#
+# No gene name is inferred from the final word of a product.
+# The actual gene and product attributes are retained.
+# ============================================================
+
+annotation_parsed <- annotation_raw %>%
+  mutate(
+    gene = extract_attribute(
+      attributes,
+      "gene"
+    ),
+
+    locus_tag = extract_attribute(
+      attributes,
+      "locus_tag"
+    ),
+
+    product = extract_attribute(
+      attributes,
+      "product"
+    )
+  )
+
+# ============================================================
+# Return the first nonmissing annotation within each locus
+# ============================================================
+
+first_nonmissing <- function(x) {
+
+  x <- as.character(
+    x
+  )
+
+  x <- x[
+    !is.na(x) &
+      x != ""
+  ]
+
+  if (length(x) == 0) {
+    return("N/A")
+  }
+
+  x[1]
+}
+
+# ============================================================
+# Collapse gene and CDS rows into one annotation per locus tag
+# ============================================================
+
+MG1655_annotation <- annotation_parsed %>%
+  filter(
+    !is.na(locus_tag),
+    locus_tag != ""
+  ) %>%
+  group_by(
+    locus_tag
+  ) %>%
+  summarise(
+    chr = first_nonmissing(
+      seqid
+    ),
+
+    gene = first_nonmissing(
+      gene
+    ),
+
+    product = first_nonmissing(
+      product
+    ),
+
+    .groups = "drop"
+  ) %>%
+  rename(
+    GeneID = locus_tag
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    )
+  ) %>%
+  distinct(
+    GeneID,
+    .keep_all = TRUE
+  )
+
+# ============================================================
+# Functional classification
+#
+# Classification uses:
+#   1. Exact gene-name matches.
+#   2. Specific functional descriptions in the product field.
+#
+# Example:
+#   gene    = yjfJ
+#   product = PspA family protein YjfJ
+#
+# This matches "PspA family protein" and is classified as
+# Envelope and membrane stress.
+# ============================================================
+
+classify_function <- function(
+    gene_lower,
+    product_lower
+) {
+
+  gene_lower <- ifelse(
+    is.na(gene_lower),
+    "",
+    tolower(
+      gene_lower
+    )
+  )
+
+  product_lower <- ifelse(
+    is.na(product_lower),
+    "",
+    tolower(
+      product_lower
+    )
+  )
+
+  case_when(
+
+    # ========================================================
+    # Envelope and membrane stress
+    # ========================================================
+
+    gene_lower %in% c(
+      "pspa",
+      "pspb",
+      "pspc",
+      "pspd",
+      "pspe",
+      "pspg",
+      "cpxp",
+      "yagu",
+      "yjfj",
+      "osmb",
+      "bsma",
+      "yiad",
+      "alx",
+      "asr",
+      "lpxc",
+      "yqae",
+      "bord",
+      "atpi"
+    ) ~
+
+      "Envelope and membrane stress",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bpspa family protein\\b|",
+        "\\bphage shock protein a\\b|",
+        "\\bphage shock protein b\\b|",
+        "\\bphage shock protein c\\b|",
+        "\\bphage shock protein d\\b|",
+        "\\bphage shock protein e\\b|",
+        "\\bphage shock protein g\\b|",
+        "\\bperiplasmic protein cpxp\\b|",
+        "\\bosmotically[- ]inducible lipoprotein\\b|",
+        "\\bmembrane[- ]bound redox modulator\\b|",
+        "\\bperiplasmic chaperone asr\\b|",
+        "\\bduf1471 domain[- ]containing putative lipoprotein\\b|",
+        "\\bpf13488 family lipoprotein\\b|",
+        "\\budp-3-o-acyl-n-acetylglucosamine deacetylase\\b|",
+        "\\batp synthase accessory factor atpi\\b"
+      )
+    ) ~
+
+      "Envelope and membrane stress",
+
+    # ========================================================
+    # Stress response and global regulation
+    # ========================================================
+
+    gene_lower %in% c(
+      "soxs",
+      "ibpa",
+      "ibpb",
+      "ytfk",
+      "dusb",
+      "fis",
+      "mara",
+      "marr",
+      "marb",
+      "rpoh",
+      "iscr",
+      "nahr",
+      "soda",
+      "trxc",
+      "nrdh",
+      "nrdi",
+      "cyar",
+      "glmz",
+      "rbsz",
+      "rttr",
+      "dksa",
+      "grea",
+      "dead",
+      "obge",
+      "yjfn",
+      "yjhq",
+      "chps",
+      "slyx",
+      "yhab"
+    ) ~
+
+      "Stress response and global regulation",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bdna-binding transcriptional dual regulator soxs\\b|",
+        "\\brna polymerase sigma factor rpoh\\b|",
+        "\\bstringent response modulator ytfk\\b|",
+        "\\bsuperoxide dismutase \\(mn\\)\\b|",
+        "\\bglutaredoxin-like protein nrdh\\b|",
+        "\\breduced thioredoxin 2\\b|",
+        "\\bdimanganese-tyrosyl radical cofactor maintenance flavodoxin nrdi\\b|",
+        "\\btranscription elongation factor grea\\b|",
+        "\\brna polymerase-binding transcription factor dksa\\b|",
+        "\\buniversal stress protein\\b|",
+        "\\bstress-induced protein\\b|",
+        "\\bstress response protein\\b|",
+        "\\bsmall regulatory rna cyar\\b|",
+        "\\bsmall regulatory rna glmz\\b|",
+        "\\bsmall regulatory rna rbsz\\b|",
+        "\\bsmall rna rttr\\b"
+      )
+    ) ~
+
+      "Stress response and global regulation",
+
+    # ========================================================
+    # Membrane and periplasmic transport
+    # ========================================================
+
+    gene_lower %in% c(
+      "rbsa",
+      "rbsb",
+      "rbsc",
+      "male",
+      "malf",
+      "malg",
+      "malk",
+      "lamb",
+      "yhjx",
+      "manz",
+      "efeo",
+      "exut",
+      "mglb",
+      "mgla",
+      "gntt",
+      "gntp",
+      "nhaa",
+      "mgta",
+      "znta",
+      "fucp",
+      "sdac",
+      "frua",
+      "lldp",
+      "dcta",
+      "nupg",
+      "uraa",
+      "yhbe",
+      "yihn",
+      "plap",
+      "punc",
+      "mdla"
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bfructuronate transporter\\b|",
+        "\\bhigh-affinity gluconate transporter\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter periplasmic binding protein\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter membrane subunit\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter atp binding subunit\\b|",
+        "\\bribose abc transporter periplasmic binding protein\\b|",
+        "\\bribose abc transporter membrane subunit\\b|",
+        "\\bribose abc transporter atp binding subunit\\b|",
+        "\\bmaltose abc transporter periplasmic binding protein\\b|",
+        "\\bmaltose abc transporter membrane subunit malf\\b|",
+        "\\bmaltose abc transporter membrane subunit malg\\b|",
+        "\\bmaltose abc transporter atp binding subunit\\b|",
+        "\\bmaltose outer membrane channel/phage lambda receptor protein\\b|",
+        "\\bna\\(\\+\\):h\\(\\+\\) antiporter nhaa\\b|",
+        "\\bl-fucose:h\\(\\+\\) symporter\\b|",
+        "\\bl-serine:h\\(\\+\\) symporter sdac\\b|",
+        "\\blactate/glycolate:h\\(\\+\\) symporter lldp\\b|",
+        "\\bc4 dicarboxylate/orotate:h\\(\\+\\) symporter\\b|",
+        "\\bnucleoside:h\\(\\+\\) symporter nupg\\b|",
+        "\\buracil:h\\(\\+\\) symporter uraa\\b|",
+        "\\bputrescine:h\\(\\+\\) symporter plap\\b|",
+        "\\bpurine nucleoside transporter punc\\b|",
+        "\\bmg\\(2\\(\\+\\)\\) importing p-type atpase\\b|",
+        "\\bzn\\(2\\(\\+\\)\\)/cd\\(2\\(\\+\\)\\)/pb\\(2\\(\\+\\)\\) exporting p-type atpase\\b|",
+        "\\bputative transporter yhjx\\b|",
+        "\\bputative transporter yhbe\\b|",
+        "\\bputative transporter yihn\\b|",
+        "\\bfructose-specific pts multiphosphoryl transfer protein frua\\b"
+      )
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    # ========================================================
+    # Carbon, amino-acid and nucleotide metabolism
+    # ========================================================
+
+    gene_lower %in% c(
+      "rbsd",
+      "rbsk",
+      "tnaa",
+      "tnac",
+      "apt",
+      "uxua",
+      "uxub",
+      "sdab",
+      "fuma",
+      "fumc",
+      "deob",
+      "fuci",
+      "gntk",
+      "acs",
+      "fadb",
+      "cara",
+      "carb",
+      "murq",
+      "ndk",
+      "gmk",
+      "cmk",
+      "meta",
+      "metb",
+      "astd",
+      "pfla",
+      "lpda",
+      "aroq",
+      "yigi",
+      "mhpf",
+      "ilvn"
+    ) ~
+
+      "Carbon, amino-acid and nucleotide metabolism",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bd-mannonate dehydratase\\b|",
+        "\\bd-mannonate oxidoreductase\\b|",
+        "\\bd-ribose pyranase\\b|",
+        "\\bphosphopentomutase\\b|",
+        "\\btryptophanase\\b|",
+        "\\btnaab operon leader peptide\\b|",
+        "\\bl-serine deaminase i\\b|",
+        "\\bl-serine deaminase ii\\b|",
+        "\\bfumarase a\\b|",
+        "\\bfumarase c\\b|",
+        "\\bl-fucose isomerase\\b|",
+        "\\bd-gluconate kinase, thermostable\\b|",
+        "\\bacetyl-coa synthetase \\(amp-forming\\)\\b|",
+        "\\bcarbamoyl-phosphate synthetase small subunit\\b|",
+        "\\bcarbamoyl-phosphate synthetase large subunit\\b|",
+        "\\bn-acetylmuramic acid 6-phosphate etherase\\b|",
+        "\\bnucleoside diphosphate kinase\\b|",
+        "\\bguanylate kinase\\b|",
+        "\\bcytidylate kinase\\b|",
+        "\\bhomoserine o-succinyltransferase\\b|",
+        "\\bo-succinylhomoserine\\(thiol\\)-lyase/o-succinylhomoserine lyase\\b|",
+        "\\bsuccinylornithine transaminase\\b|",
+        "\\bpyruvate formate-lyase activating enzyme\\b|",
+        "\\blipoamide dehydrogenase\\b|",
+        "\\bchorismate lyase\\b|",
+        "\\bputative thioesterase yigi\\b|",
+        "\\bacetohydroxy acid synthase i subunit ilvn\\b"
+      )
+    ) ~
+
+      "Carbon, amino-acid and nucleotide metabolism",
+
+    TRUE ~
+      NA_character_
+  )
+}
+
+# ============================================================
+# Fit the edgeR model once
+# ============================================================
+
+fit <- glmQLFit(
+  y,
+  design
+)
+
+# Positive logFC means higher expression in the NEO condition
+# relative to EGFP.
+# ============================================================
+
+contrast_list <- list(
+  KpnNEO = c(-1, 1, 0, 0, 0),
+  C3.1bNEO = c(-1, 0, 1, 0, 0),
+  C4.1bNEO = c(-1, 0, 0, 1, 0),
+  C7.6bNEO = c(-1, 0, 0, 0, 1)
+)
+
+# ============================================================
+# Run all four differential-expression comparisons
+# ============================================================
+
+dge_results <- lapply(
+  names(contrast_list),
+  function(comparison_name) {
+
+    qlf_test <- glmQLFTest(
+      fit,
+      contrast = contrast_list[[comparison_name]]
+    )
+
+    topTags(
+      qlf_test,
+      n = Inf,
+      adjust.method = "BH",
+      sort.by = "PValue",
+      p.value = 1
+    )$table %>%
+      rownames_to_column(
+        "GeneID"
+      ) %>%
+      mutate(
+        GeneID = as.character(
+          GeneID
+        )
+      ) %>%
+      left_join(
+        MG1655_annotation,
+        by = "GeneID"
+      ) %>%
+      mutate(
+        NEO = comparison_name,
+
+        gene = if_else(
+          is.na(gene) |
+            gene == "",
+          "N/A",
+          gene
+        ),
+
+        product = if_else(
+          is.na(product) |
+            product == "",
+          "N/A",
+          product
+        ),
+
+        chr = if_else(
+          is.na(chr) |
+            chr == "",
+          "N/A",
+          chr
+        ),
+
+        gene_lower = tolower(
+          str_squish(
+            gene
+          )
+        ),
+
+        product_lower = tolower(
+          str_squish(
+            product
+          )
+        ),
+
+        FDR_plot = pmax(
+          FDR,
+          .Machine$double.xmin
+        ),
+
+        point_id = paste(
+          NEO,
+          GeneID,
+          sep = "_"
+        )
+      )
+  }
+)
+
+names(dge_results) <- names(
+  contrast_list
+)
+
+# Preserve the individual dataframes
+dge_EGFP_v_KpnNEO <- dge_results[["KpnNEO"]]
+dge_EGFP_v_c3_1NEO <- dge_results[["C3.1bNEO"]]
+dge_EGFP_v_c4_1NEO <- dge_results[["C4.1bNEO"]]
+dge_EGFP_v_c7_6NEO <- dge_results[["C7.6bNEO"]]
+
+# ============================================================
+# Combine, determine significance, and classify functions
+#
+# Significant:
+#   logFC >= 2 or logFC <= -2
+#   FDR < 0.05
+# ============================================================
+
+dge_all_NEOs <- bind_rows(
+  dge_results
+) %>%
+  mutate(
+    NEO = factor(
+      NEO,
+      levels = NEO_levels
+    ),
+
+    Significant = (
+      abs(logFC) >= plot_logFC_threshold &
+        FDR < FDR_threshold
+    ),
+
+    Direction = case_when(
+      Significant &
+        logFC >= plot_logFC_threshold ~
+        "Upregulated",
+
+      Significant &
+        logFC <= -plot_logFC_threshold ~
+        "Downregulated",
+
+      TRUE ~
+        "Not significant"
+    ),
+
+    Function_category = classify_function(
+      gene_lower = gene_lower,
+      product_lower = product_lower
+    ),
+
+    Highlight_function = (
+      Significant &
+        !is.na(Function_category)
+    ),
+
+    Function_category = factor(
+      Function_category,
+      levels = c(
+        "Envelope and membrane stress",
+        "Stress response and global regulation",
+        "Membrane and periplasmic transport",
+        "Carbon, amino-acid and nucleotide metabolism"
+      )
+    ),
+
+    info = paste0(
+      "NEO: ", NEO,
+      " | gene: ", gene,
+      " | product: ", product,
+      " | locus_tag: ", GeneID,
+      " | logFC: ", round(logFC, 4),
+      " | FDR: ", signif(FDR, 4),
+      " | direction: ", Direction,
+      " | category: ",
+      if_else(
+        is.na(Function_category),
+        "Other",
+        as.character(Function_category)
+      )
+    )
+  )
+
+# ============================================================
+# Separate plotting layers
+# ============================================================
+
+# Genes below the logFC/FDR thresholds
+dge_nonsignificant <- dge_all_NEOs %>%
+  filter(
+    !Significant
+  )
+
+# Significant genes that do not match a defined category
+dge_other_significant <- dge_all_NEOs %>%
+  filter(
+    Significant,
+    is.na(Function_category)
+  )
+
+# Significant genes matching one of the four categories
+dge_function_highlighted <- dge_all_NEOs %>%
+  filter(
+    Highlight_function
+  )
+
+# ============================================================
+# Interactive volcano plot
+#
+# Functional category = fill color
+# NEO condition       = point shape
+# Other significant   = dark gray
+# Nonsignificant      = light gray
+# ============================================================
+
+all_NEOs_volcano <- ggplot(
+  dge_all_NEOs,
+  aes(
+    x = logFC,
+    y = -log10(FDR_plot)
+  )
+) +
+
+  # ----------------------------------------------------------
+  # Nonsignificant background
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_nonsignificant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 19,
+    size = 1,
+    color = "gray80",
+    alpha = 0.25
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant but uncategorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_other_significant,
+    aes(
+      shape = NEO,
+      tooltip = info,
+      data_id = point_id
+    ),
+    size = 2,
+    fill = "gray35",
+    color = "gray20",
+    stroke = 0.35,
+    alpha = 0.75
+  ) +
+
+  # ----------------------------------------------------------
+  # logFC thresholds at -2 and +2
+  # ----------------------------------------------------------
+
+  geom_vline(
+    xintercept = c(
+      -plot_logFC_threshold,
+      plot_logFC_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # FDR threshold
+  # ----------------------------------------------------------
+
+  geom_hline(
+    yintercept = -log10(
+      FDR_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant genes matching functional categories
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_function_highlighted,
+    aes(
+      fill = Function_category,
+      shape = NEO,
+      tooltip = info,
+      data_id = point_id
+    ),
+    size = 3,
+    color = "black",
+    stroke = 0.45,
+    alpha = 0.95
+  ) +
+
+  # ----------------------------------------------------------
+  # Functional-category colors
+  # ----------------------------------------------------------
+
+  scale_fill_manual(
+    name = "Functional category",
+    values = c(
+      "Envelope and membrane stress" =
+        "#D73027",
+
+      "Stress response and global regulation" =
+        "#7B3294",
+
+      "Membrane and periplasmic transport" =
+        "#0571B0",
+
+      "Carbon, amino-acid and nucleotide metabolism" =
+        "#1A9850"
+    ),
+    drop = TRUE
+  ) +
+
+  # ----------------------------------------------------------
+  # NEO-condition shapes
+  # ----------------------------------------------------------
+
+  scale_shape_manual(
+    name = "NEO condition",
+    values = c(
+      "KpnNEO" = 21,
+      "C3.1bNEO" = 24,
+      "C4.1bNEO" = 22,
+      "C7.6bNEO" = 23
+    ),
+    drop = FALSE
+  ) +
+
+  guides(
+    fill = guide_legend(
+      order = 1,
+      override.aes = list(
+        shape = 21,
+        size = 4,
+        color = "black",
+        alpha = 1
+      )
+    ),
+
+    shape = guide_legend(
+      order = 2,
+      override.aes = list(
+        fill = "white",
+        color = "black",
+        size = 4,
+        alpha = 1
+      )
+    )
+  ) +
+
+  labs(
+    title = "Functional Responses Across NEO Conditions",
+
+    x = expression(
+      log[2] * "(expression fold change)"
+    ),
+
+    y = expression(
+      -log[10] * "(FDR)"
+    )
+  ) +
+
+  theme(
+    aspect.ratio = 1 / 2,
+
+    legend.position = "right",
+
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold",
+      size = 13
+    ),
+
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+
+    panel.background = element_rect(
+      fill = "white",
+      colour = "black"
+    ),
+
+    text = element_text(
+      size = 12
+    ),
+
+    axis.title = element_text(
+      face = "bold",
+      size = 12
+    ),
+
+    legend.title = element_text(
+      face = "bold",
+      size = 11
+    ),
+
+    legend.text = element_text(
+      size = 9
+    )
+  )
+
+# ============================================================
+# Display static plot
+# ============================================================
+
+print(
+  all_NEOs_volcano
+)
+
+# ============================================================
+# Display interactive plot in the RStudio Viewer
+#
+# No HTML file is written.
+# ============================================================
+
+all_NEOs_volcano_interactive <- girafe(
+  ggobj = all_NEOs_volcano,
+  width_svg = 11.5,
+  height_svg = 5.8,
+  options = list(
+    opts_hover(
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:1.5px;"
+      )
+    ),
+
+    opts_selection(
+      type = "single",
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:2px;"
+      )
+    ),
+
+    opts_tooltip(
+      opacity = 0.95,
+      use_fill = TRUE,
+      use_stroke = TRUE,
+      css = paste0(
+        "background-color:black;",
+        "color:white;",
+        "padding:8px;",
+        "border-radius:3px;",
+        "font-size:12px;",
+        "max-width:700px;",
+        "white-space:normal;"
+      )
+    )
+  )
+)
+
+all_NEOs_volcano_interactive
+```
+```{r}
+library(edgeR)
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(ggiraph)
+library(stringr)
+
+# ============================================================
+# Settings
+# ============================================================
+
+annotation_file <- "./data/input/Annotations.csv"
+
+plot_logFC_threshold <- 4
+FDR_threshold <- 0.05
+
+# ============================================================
+# Check required objects
+# ============================================================
+
+required_objects <- c(
+  "y",
+  "design"
+)
+
+missing_objects <- required_objects[
+  !vapply(
+    required_objects,
+    exists,
+    logical(1),
+    inherits = TRUE
+  )
+]
+
+if (length(missing_objects) > 0) {
+  stop(
+    paste0(
+      "Missing required object(s): ",
+      paste(
+        missing_objects,
+        collapse = ", "
+      )
+    )
+  )
+}
+
+if (!file.exists(annotation_file)) {
+  stop(
+    paste0(
+      "Annotation file was not found: ",
+      annotation_file
+    )
+  )
+}
+
+# ============================================================
+# Read annotation file
+#
+# The annotation file is expected to be a headerless,
+# nine-column GFF-style CSV file.
+# ============================================================
+
+annotation_raw <- read.csv(
+  annotation_file,
+  header = FALSE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE,
+  quote = "\"",
+  comment.char = ""
+)
+
+if (ncol(annotation_raw) != 9) {
+  stop(
+    paste0(
+      "The annotation file should contain 9 columns, but ",
+      ncol(annotation_raw),
+      " columns were detected."
+    )
+  )
+}
+
+colnames(annotation_raw) <- c(
+  "seqid",
+  "description",
+  "feature_type",
+  "start",
+  "end",
+  "score",
+  "strand",
+  "phase",
+  "attributes"
+)
+
+# ============================================================
+# Extract one attribute from the GFF attributes column
+# ============================================================
+
+extract_attribute <- function(
+    attributes,
+    key
+) {
+
+  attributes <- as.character(
+    attributes
+  )
+
+  pattern <- paste0(
+    "(?:^|;)",
+    key,
+    "=([^;]+)"
+  )
+
+  value <- str_match(
+    attributes,
+    pattern
+  )[, 2]
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2C",
+      ignore_case = TRUE
+    ),
+    ","
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%3B",
+      ignore_case = TRUE
+    ),
+    ";"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%28",
+      ignore_case = TRUE
+    ),
+    "("
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%29",
+      ignore_case = TRUE
+    ),
+    ")"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2B",
+      ignore_case = TRUE
+    ),
+    "+"
+  )
+
+  value <- str_replace_all(
+    value,
+    "\u00A0",
+    " "
+  )
+
+  str_squish(
+    value
+  )
+}
+
+# ============================================================
+# Parse structured annotation fields
+# ============================================================
+
+annotation_parsed <- annotation_raw %>%
+  mutate(
+    gene = extract_attribute(
+      attributes,
+      "gene"
+    ),
+
+    locus_tag = extract_attribute(
+      attributes,
+      "locus_tag"
+    ),
+
+    product = extract_attribute(
+      attributes,
+      "product"
+    )
+  )
+
+# ============================================================
+# Return the first nonmissing annotation for each locus
+# ============================================================
+
+first_nonmissing <- function(x) {
+
+  x <- as.character(
+    x
+  )
+
+  x <- x[
+    !is.na(x) &
+      x != ""
+  ]
+
+  if (length(x) == 0) {
+    return("N/A")
+  }
+
+  x[1]
+}
+
+# ============================================================
+# Collapse annotation rows into one row per locus tag
+# ============================================================
+
+MG1655_annotation <- annotation_parsed %>%
+  filter(
+    !is.na(locus_tag),
+    locus_tag != ""
+  ) %>%
+  group_by(
+    locus_tag
+  ) %>%
+  summarise(
+    chr = first_nonmissing(
+      seqid
+    ),
+
+    gene = first_nonmissing(
+      gene
+    ),
+
+    product = first_nonmissing(
+      product
+    ),
+
+    .groups = "drop"
+  ) %>%
+  rename(
+    GeneID = locus_tag
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    )
+  ) %>%
+  distinct(
+    GeneID,
+    .keep_all = TRUE
+  )
+
+# ============================================================
+# Functional classification
+#
+# Uses:
+#   1. Exact gene-name matches.
+#   2. Specific product/family-description matches.
+#
+# Example:
+#   gene    = yjfJ
+#   product = PspA family protein YjfJ
+#
+# This is classified as:
+#   Envelope and membrane stress
+# ============================================================
+
+classify_function <- function(
+    gene_lower,
+    product_lower
+) {
+
+  gene_lower <- ifelse(
+    is.na(gene_lower),
+    "",
+    tolower(
+      gene_lower
+    )
+  )
+
+  product_lower <- ifelse(
+    is.na(product_lower),
+    "",
+    tolower(
+      product_lower
+    )
+  )
+
+  case_when(
+
+    # ========================================================
+    # Envelope and membrane stress
+    # ========================================================
+
+    gene_lower %in% c(
+      "pspa",
+      "pspb",
+      "pspc",
+      "pspd",
+      "pspe",
+      "pspg",
+      "cpxp",
+      "yagu",
+      "yjfj",
+      "osmb",
+      "bsma",
+      "yiad",
+      "alx",
+      "asr",
+      "lpxc",
+      "yqae",
+      "bord",
+      "atpi"
+    ) ~
+
+      "Envelope and membrane stress",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bpspa family protein\\b|",
+        "\\bphage shock protein a\\b|",
+        "\\bphage shock protein b\\b|",
+        "\\bphage shock protein c\\b|",
+        "\\bphage shock protein d\\b|",
+        "\\bphage shock protein e\\b|",
+        "\\bphage shock protein g\\b|",
+        "\\bperiplasmic protein cpxp\\b|",
+        "\\bosmotically[- ]inducible lipoprotein\\b|",
+        "\\bmembrane[- ]bound redox modulator\\b|",
+        "\\bperiplasmic chaperone asr\\b|",
+        "\\bduf1471 domain[- ]containing putative lipoprotein\\b|",
+        "\\bpf13488 family lipoprotein\\b|",
+        "\\budp-3-o-acyl-n-acetylglucosamine deacetylase\\b|",
+        "\\batp synthase accessory factor atpi\\b"
+      )
+    ) ~
+
+      "Envelope and membrane stress",
+
+    # ========================================================
+    # Stress response and global regulation
+    # ========================================================
+
+    gene_lower %in% c(
+      "soxs",
+      "ibpa",
+      "ibpb",
+      "ytfk",
+      "dusb",
+      "fis",
+      "mara",
+      "marr",
+      "marb",
+      "rpoh",
+      "iscr",
+      "nahr",
+      "soda",
+      "trxc",
+      "nrdh",
+      "nrdi",
+      "cyar",
+      "glmz",
+      "rbsz",
+      "rttr",
+      "dksa",
+      "grea",
+      "dead",
+      "obge",
+      "yjfn",
+      "yjhq",
+      "chps",
+      "slyx",
+      "yhab"
+    ) ~
+
+      "Stress response and global regulation",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bdna-binding transcriptional dual regulator soxs\\b|",
+        "\\brna polymerase sigma factor rpoh\\b|",
+        "\\bstringent response modulator ytfk\\b|",
+        "\\bsuperoxide dismutase \\(mn\\)\\b|",
+        "\\bglutaredoxin-like protein nrdh\\b|",
+        "\\breduced thioredoxin 2\\b|",
+        "\\bdimanganese-tyrosyl radical cofactor maintenance flavodoxin nrdi\\b|",
+        "\\btranscription elongation factor grea\\b|",
+        "\\brna polymerase-binding transcription factor dksa\\b|",
+        "\\buniversal stress protein\\b|",
+        "\\bstress-induced protein\\b|",
+        "\\bstress response protein\\b|",
+        "\\bsmall regulatory rna cyar\\b|",
+        "\\bsmall regulatory rna glmz\\b|",
+        "\\bsmall regulatory rna rbsz\\b|",
+        "\\bsmall rna rttr\\b"
+      )
+    ) ~
+
+      "Stress response and global regulation",
+
+    # ========================================================
+    # Membrane and periplasmic transport
+    # ========================================================
+
+    gene_lower %in% c(
+      "rbsa",
+      "rbsb",
+      "rbsc",
+      "male",
+      "malf",
+      "malg",
+      "malk",
+      "lamb",
+      "yhjx",
+      "manz",
+      "efeo",
+      "exut",
+      "mglb",
+      "mgla",
+      "gntt",
+      "gntp",
+      "nhaa",
+      "mgta",
+      "znta",
+      "fucp",
+      "sdac",
+      "frua",
+      "lldp",
+      "dcta",
+      "nupg",
+      "uraa",
+      "yhbe",
+      "yihn",
+      "plap",
+      "punc",
+      "mdla"
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bfructuronate transporter\\b|",
+        "\\bhigh-affinity gluconate transporter\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter periplasmic binding protein\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter membrane subunit\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter atp binding subunit\\b|",
+        "\\bribose abc transporter periplasmic binding protein\\b|",
+        "\\bribose abc transporter membrane subunit\\b|",
+        "\\bribose abc transporter atp binding subunit\\b|",
+        "\\bmaltose abc transporter periplasmic binding protein\\b|",
+        "\\bmaltose abc transporter membrane subunit malf\\b|",
+        "\\bmaltose abc transporter membrane subunit malg\\b|",
+        "\\bmaltose abc transporter atp binding subunit\\b|",
+        "\\bmaltose outer membrane channel/phage lambda receptor protein\\b|",
+        "\\bna\\(\\+\\):h\\(\\+\\) antiporter nhaa\\b|",
+        "\\bl-fucose:h\\(\\+\\) symporter\\b|",
+        "\\bl-serine:h\\(\\+\\) symporter sdac\\b|",
+        "\\blactate/glycolate:h\\(\\+\\) symporter lldp\\b|",
+        "\\bc4 dicarboxylate/orotate:h\\(\\+\\) symporter\\b|",
+        "\\bnucleoside:h\\(\\+\\) symporter nupg\\b|",
+        "\\buracil:h\\(\\+\\) symporter uraa\\b|",
+        "\\bputrescine:h\\(\\+\\) symporter plap\\b|",
+        "\\bpurine nucleoside transporter punc\\b|",
+        "\\bmg\\(2\\(\\+\\)\\) importing p-type atpase\\b|",
+        "\\bzn\\(2\\(\\+\\)\\)/cd\\(2\\(\\+\\)\\)/pb\\(2\\(\\+\\)\\) exporting p-type atpase\\b|",
+        "\\bputative transporter yhjx\\b|",
+        "\\bputative transporter yhbe\\b|",
+        "\\bputative transporter yihn\\b|",
+        "\\bfructose-specific pts multiphosphoryl transfer protein frua\\b"
+      )
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    # ========================================================
+    # Carbon, amino-acid and nucleotide metabolism
+    # ========================================================
+
+    gene_lower %in% c(
+      "rbsd",
+      "rbsk",
+      "tnaa",
+      "tnac",
+      "apt",
+      "uxua",
+      "uxub",
+      "sdab",
+      "fuma",
+      "fumc",
+      "deob",
+      "fuci",
+      "gntk",
+      "acs",
+      "fadb",
+      "cara",
+      "carb",
+      "murq",
+      "ndk",
+      "gmk",
+      "cmk",
+      "meta",
+      "metb",
+      "astd",
+      "pfla",
+      "lpda",
+      "aroq",
+      "yigi",
+      "mhpf",
+      "ilvn"
+    ) ~
+
+      "Carbon, amino-acid and nucleotide metabolism",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bd-mannonate dehydratase\\b|",
+        "\\bd-mannonate oxidoreductase\\b|",
+        "\\bd-ribose pyranase\\b|",
+        "\\bphosphopentomutase\\b|",
+        "\\btryptophanase\\b|",
+        "\\btnaab operon leader peptide\\b|",
+        "\\bl-serine deaminase i\\b|",
+        "\\bl-serine deaminase ii\\b|",
+        "\\bfumarase a\\b|",
+        "\\bfumarase c\\b|",
+        "\\bl-fucose isomerase\\b|",
+        "\\bd-gluconate kinase, thermostable\\b|",
+        "\\bacetyl-coa synthetase \\(amp-forming\\)\\b|",
+        "\\bcarbamoyl-phosphate synthetase small subunit\\b|",
+        "\\bcarbamoyl-phosphate synthetase large subunit\\b|",
+        "\\bn-acetylmuramic acid 6-phosphate etherase\\b|",
+        "\\bnucleoside diphosphate kinase\\b|",
+        "\\bguanylate kinase\\b|",
+        "\\bcytidylate kinase\\b|",
+        "\\bhomoserine o-succinyltransferase\\b|",
+        "\\bo-succinylhomoserine\\(thiol\\)-lyase/o-succinylhomoserine lyase\\b|",
+        "\\bsuccinylornithine transaminase\\b|",
+        "\\bpyruvate formate-lyase activating enzyme\\b|",
+        "\\blipoamide dehydrogenase\\b|",
+        "\\bchorismate lyase\\b|",
+        "\\bputative thioesterase yigi\\b|",
+        "\\bacetohydroxy acid synthase i subunit ilvn\\b"
+      )
+    ) ~
+
+      "Carbon, amino-acid and nucleotide metabolism",
+
+    TRUE ~
+      NA_character_
+  )
+}
+
+# ============================================================
+# Fit edgeR model
+# ============================================================
+
+fit <- glmQLFit(
+  y,
+  design
+)
+
+# ============================================================
+# Run only the KpnNEO versus EGFP contrast
+#
+# Positive logFC means higher expression in KpnNEO relative
+# to EGFP.
+# ============================================================
+
+KpnNEO_test <- glmQLFTest(
+  fit,
+  contrast = c(
+    -1,
+    1,
+    0,
+    0,
+    0
+  )
+)
+
+dge_KpnNEO <- topTags(
+  KpnNEO_test,
+  n = Inf,
+  adjust.method = "BH",
+  sort.by = "PValue",
+  p.value = 1
+)$table %>%
+  rownames_to_column(
+    "GeneID"
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    )
+  ) %>%
+  left_join(
+    MG1655_annotation,
+    by = "GeneID"
+  ) %>%
+  mutate(
+    NEO = "KpnNEO",
+
+    gene = if_else(
+      is.na(gene) |
+        gene == "",
+      "N/A",
+      gene
+    ),
+
+    product = if_else(
+      is.na(product) |
+        product == "",
+      "N/A",
+      product
+    ),
+
+    chr = if_else(
+      is.na(chr) |
+        chr == "",
+      "N/A",
+      chr
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    ),
+
+    FDR_plot = pmax(
+      FDR,
+      .Machine$double.xmin
+    ),
+
+    Significant = (
+      abs(logFC) >= plot_logFC_threshold &
+        FDR < FDR_threshold
+    ),
+
+    Direction = case_when(
+      Significant &
+        logFC >= plot_logFC_threshold ~
+        "Upregulated",
+
+      Significant &
+        logFC <= -plot_logFC_threshold ~
+        "Downregulated",
+
+      TRUE ~
+        "Not significant"
+    ),
+
+    Function_category = classify_function(
+      gene_lower = gene_lower,
+      product_lower = product_lower
+    ),
+
+    Highlight_function = (
+      Significant &
+        !is.na(Function_category)
+    ),
+
+    Function_category = factor(
+      Function_category,
+      levels = c(
+        "Envelope and membrane stress",
+        "Stress response and global regulation",
+        "Membrane and periplasmic transport",
+        "Carbon, amino-acid and nucleotide metabolism"
+      )
+    ),
+
+    point_id = paste(
+      NEO,
+      GeneID,
+      sep = "_"
+    ),
+
+    info = paste0(
+      "Condition: KpnNEO",
+      " | gene: ", gene,
+      " | product: ", product,
+      " | locus_tag: ", GeneID,
+      " | logFC: ", round(logFC, 4),
+      " | FDR: ", signif(FDR, 4),
+      " | direction: ", Direction,
+      " | category: ",
+      if_else(
+        is.na(Function_category),
+        "Other",
+        as.character(Function_category)
+      )
+    )
+  )
+
+# Preserve the previous dataframe naming convention
+dge_EGFP_v_KpnNEO <- dge_KpnNEO
+
+# ============================================================
+# Separate plotting layers
+# ============================================================
+
+# Genes below the logFC and/or FDR thresholds
+dge_KpnNEO_nonsignificant <- dge_KpnNEO %>%
+  filter(
+    !Significant
+  )
+
+# Significant genes not assigned to one of the four categories
+dge_KpnNEO_other_significant <- dge_KpnNEO %>%
+  filter(
+    Significant,
+    is.na(Function_category)
+  )
+
+# Significant genes assigned to a functional category
+dge_KpnNEO_function_highlighted <- dge_KpnNEO %>%
+  filter(
+    Highlight_function
+  )
+
+# ============================================================
+# KpnNEO volcano plot
+#
+# Functional category = fill color
+# Other significant   = dark gray
+# Nonsignificant      = light gray
+#
+# All points use the same shape because only KpnNEO is plotted.
+# ============================================================
+
+KpnNEO_volcano <- ggplot(
+  dge_KpnNEO,
+  aes(
+    x = logFC,
+    y = -log10(FDR_plot)
+  )
+) +
+
+  # ----------------------------------------------------------
+  # Nonsignificant genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_KpnNEO_nonsignificant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 1.3,
+    fill = "gray80",
+    color = "gray70",
+    stroke = 0.15,
+    alpha = 0.30
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant uncategorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_KpnNEO_other_significant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 2.2,
+    fill = "gray80",
+    color = "gray70",
+    stroke = 0.35,
+    alpha = 0.80
+  ) +
+
+  # ----------------------------------------------------------
+  # logFC thresholds at -2 and +2
+  # ----------------------------------------------------------
+
+  geom_vline(
+    xintercept = c(
+      -plot_logFC_threshold,
+      plot_logFC_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # FDR threshold
+  # ----------------------------------------------------------
+
+  geom_hline(
+    yintercept = -log10(
+      FDR_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant functionally categorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_KpnNEO_function_highlighted,
+    aes(
+      fill = Function_category,
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 3.2,
+    color = "black",
+    stroke = 0.45,
+    alpha = 0.95
+  ) +
+
+  # ----------------------------------------------------------
+  # Functional-category colors
+  # ----------------------------------------------------------
+
+  scale_fill_manual(
+    name = "Functional category",
+    values = c(
+      "Envelope and membrane stress" =
+        "lightblue",
+
+      "Stress response and global regulation" =
+        "darkgreen",
+
+      "Membrane and periplasmic transport" =
+        "maroon",
+
+      "Carbon, amino-acid and nucleotide metabolism" =
+        "orange"
+    ),
+    drop = TRUE
+  ) +
+
+  guides(
+    fill = guide_legend(
+      override.aes = list(
+        shape = 21,
+        size = 4,
+        color = "black",
+        alpha = 1
+      )
+    )
+  ) +
+
+  labs(
+    title = "KpnNEO vs. EGFP",
+
+    x = expression(
+      log[2] * "(expression fold change)"
+    ),
+
+    y = expression(
+      -log[10] * "(FDR)"
+    )
+  ) +
+
+  theme(
+    aspect.ratio = 1 / 2,
+
+    legend.position = "right",
+
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold",
+      size = 13
+    ),
+
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+
+    panel.background = element_rect(
+      fill = "white",
+      colour = "black"
+    ),
+
+    text = element_text(
+      size = 12
+    ),
+
+    axis.title = element_text(
+      face = "bold",
+      size = 12
+    ),
+
+    legend.title = element_text(
+      face = "bold",
+      size = 11
+    ),
+
+    legend.text = element_text(
+      size = 9
+    )
+  )
+
+# ============================================================
+# Display static plot
+# ============================================================
+
+print(
+  KpnNEO_volcano
+)
+
+# ============================================================
+# Display interactive plot in the RStudio Viewer
+#
+# No output file is created.
+# ============================================================
+
+KpnNEO_volcano_interactive <- girafe(
+  ggobj = KpnNEO_volcano,
+  width_svg = 10,
+  height_svg = 5.8,
+  options = list(
+    opts_hover(
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:1.5px;"
+      )
+    ),
+
+    opts_selection(
+      type = "single",
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:2px;"
+      )
+    ),
+
+    opts_tooltip(
+      opacity = 0.95,
+      use_fill = TRUE,
+      use_stroke = TRUE,
+      css = paste0(
+        "background-color:black;",
+        "color:white;",
+        "padding:8px;",
+        "border-radius:3px;",
+        "font-size:12px;",
+        "max-width:700px;",
+        "white-space:normal;"
+      )
+    )
+  )
+)
+
+KpnNEO_volcano_interactive
+```
+
+
+
+
+
+```{r}
+library(edgeR)
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(ggiraph)
+library(stringr)
+
+# ============================================================
+# Settings
+# ============================================================
+
+annotation_file <- "./data/input/Annotations.csv"
+
+plot_logFC_threshold <- 2
+FDR_threshold <- 0.05
+
+# ============================================================
+# Check required objects
+# ============================================================
+
+required_objects <- c(
+  "y",
+  "design"
+)
+
+missing_objects <- required_objects[
+  !vapply(
+    required_objects,
+    exists,
+    logical(1),
+    inherits = TRUE
+  )
+]
+
+if (length(missing_objects) > 0) {
+  stop(
+    paste0(
+      "Missing required object(s): ",
+      paste(
+        missing_objects,
+        collapse = ", "
+      )
+    )
+  )
+}
+
+if (!file.exists(annotation_file)) {
+  stop(
+    paste0(
+      "Annotation file was not found: ",
+      annotation_file
+    )
+  )
+}
+
+# ============================================================
+# Read annotation file
+#
+# The annotation file is expected to be a headerless,
+# nine-column GFF-style CSV file.
+# ============================================================
+
+annotation_raw <- read.csv(
+  annotation_file,
+  header = FALSE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE,
+  quote = "\"",
+  comment.char = ""
+)
+
+if (ncol(annotation_raw) != 9) {
+  stop(
+    paste0(
+      "The annotation file should contain 9 columns, but ",
+      ncol(annotation_raw),
+      " columns were detected."
+    )
+  )
+}
+
+colnames(annotation_raw) <- c(
+  "seqid",
+  "description",
+  "feature_type",
+  "start",
+  "end",
+  "score",
+  "strand",
+  "phase",
+  "attributes"
+)
+
+# ============================================================
+# Extract one attribute from the GFF attributes column
+# ============================================================
+
+extract_attribute <- function(
+    attributes,
+    key
+) {
+
+  attributes <- as.character(
+    attributes
+  )
+
+  pattern <- paste0(
+    "(?:^|;)",
+    key,
+    "=([^;]+)"
+  )
+
+  value <- str_match(
+    attributes,
+    pattern
+  )[, 2]
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2C",
+      ignore_case = TRUE
+    ),
+    ","
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%3B",
+      ignore_case = TRUE
+    ),
+    ";"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%28",
+      ignore_case = TRUE
+    ),
+    "("
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%29",
+      ignore_case = TRUE
+    ),
+    ")"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2B",
+      ignore_case = TRUE
+    ),
+    "+"
+  )
+
+  value <- str_replace_all(
+    value,
+    "\u00A0",
+    " "
+  )
+
+  str_squish(
+    value
+  )
+}
+
+# ============================================================
+# Parse structured annotation fields
+# ============================================================
+
+annotation_parsed <- annotation_raw %>%
+  mutate(
+    gene = extract_attribute(
+      attributes,
+      "gene"
+    ),
+
+    locus_tag = extract_attribute(
+      attributes,
+      "locus_tag"
+    ),
+
+    product = extract_attribute(
+      attributes,
+      "product"
+    )
+  )
+
+# ============================================================
+# Return the first nonmissing annotation for each locus
+# ============================================================
+
+first_nonmissing <- function(x) {
+
+  x <- as.character(
+    x
+  )
+
+  x <- x[
+    !is.na(x) &
+      x != ""
+  ]
+
+  if (length(x) == 0) {
+    return("N/A")
+  }
+
+  x[1]
+}
+
+# ============================================================
+# Collapse annotation rows into one row per locus tag
+# ============================================================
+
+MG1655_annotation <- annotation_parsed %>%
+  filter(
+    !is.na(locus_tag),
+    locus_tag != ""
+  ) %>%
+  group_by(
+    locus_tag
+  ) %>%
+  summarise(
+    chr = first_nonmissing(
+      seqid
+    ),
+
+    gene = first_nonmissing(
+      gene
+    ),
+
+    product = first_nonmissing(
+      product
+    ),
+
+    .groups = "drop"
+  ) %>%
+  rename(
+    GeneID = locus_tag
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    )
+  ) %>%
+  distinct(
+    GeneID,
+    .keep_all = TRUE
+  )
+
+# ============================================================
+# Functional classification
+#
+# Uses:
+#   1. Exact gene-name matches.
+#   2. Specific product/family-description matches.
+#
+# Categories:
+#   1. Envelope and membrane stress
+#   2. Stress response and regulation
+#   3. Membrane and periplasmic transport
+#   4. Energy and nucleotide homeostasis
+#
+# Example:
+#   gene    = yjfJ
+#   product = PspA family protein YjfJ
+#
+# This is classified as:
+#   Envelope and membrane stress
+# ============================================================
+
+classify_function <- function(
+    gene_lower,
+    product_lower
+) {
+
+  gene_lower <- ifelse(
+    is.na(gene_lower),
+    "",
+    tolower(
+      gene_lower
+    )
+  )
+
+  product_lower <- ifelse(
+    is.na(product_lower),
+    "",
+    tolower(
+      product_lower
+    )
+  )
+
+  case_when(
+
+    # ========================================================
+    # Envelope and membrane stress
+    # ========================================================
+
+    gene_lower %in% c(
+      "pspa",
+      "pspb",
+      "pspc",
+      "pspd",
+      "pspe",
+      "pspg",
+      "cpxp",
+      "yagu",
+      "yjfj",
+      "osmb",
+      "bsma",
+      "yiad",
+      "alx",
+      "asr",
+      "lpxc",
+      "yqae",
+      "bord",
+      "atpi"
+    ) ~
+
+      "Envelope and membrane stress",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bpspa family protein\\b|",
+        "\\bphage shock protein a\\b|",
+        "\\bphage shock protein b\\b|",
+        "\\bphage shock protein c\\b|",
+        "\\bphage shock protein d\\b|",
+        "\\bphage shock protein e\\b|",
+        "\\bphage shock protein g\\b|",
+        "\\bperiplasmic protein cpxp\\b|",
+        "\\bosmotically[- ]inducible lipoprotein\\b|",
+        "\\bmembrane[- ]bound redox modulator\\b|",
+        "\\bperiplasmic chaperone asr\\b|",
+        "\\bduf1471 domain[- ]containing putative lipoprotein\\b|",
+        "\\bpf13488 family lipoprotein\\b|",
+        "\\budp-3-o-acyl-n-acetylglucosamine deacetylase\\b|",
+        "\\batp synthase accessory factor atpi\\b"
+      )
+    ) ~
+
+      "Envelope and membrane stress",
+
+    # ========================================================
+    # Stress response and regulation
+    # ========================================================
+
+    gene_lower %in% c(
+      "soxs",
+      "ibpa",
+      "ibpb",
+      "ytfk",
+      "dusb",
+      "fis",
+      "mara",
+      "marr",
+      "marb",
+      "rpoh",
+      "iscr",
+      "nahr",
+      "soda",
+      "trxc",
+      "nrdh",
+      "nrdi",
+      "cyar",
+      "glmz",
+      "rbsz",
+      "rttr",
+      "dksa",
+      "grea",
+      "dead",
+      "obge",
+      "yjfn",
+      "yjhq",
+      "chps",
+      "slyx",
+      "yhab"
+    ) ~
+
+      "Stress response and regulation",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bdna-binding transcriptional dual regulator soxs\\b|",
+        "\\brna polymerase sigma factor rpoh\\b|",
+        "\\bstringent response modulator ytfk\\b|",
+        "\\bsuperoxide dismutase \\(mn\\)\\b|",
+        "\\bglutaredoxin-like protein nrdh\\b|",
+        "\\breduced thioredoxin 2\\b|",
+        "\\bdimanganese-tyrosyl radical cofactor maintenance flavodoxin nrdi\\b|",
+        "\\btranscription elongation factor grea\\b|",
+        "\\brna polymerase-binding transcription factor dksa\\b|",
+        "\\buniversal stress protein\\b|",
+        "\\bstress-induced protein\\b|",
+        "\\bstress response protein\\b|",
+        "\\bsmall regulatory rna cyar\\b|",
+        "\\bsmall regulatory rna glmz\\b|",
+        "\\bsmall regulatory rna rbsz\\b|",
+        "\\bsmall rna rttr\\b"
+      )
+    ) ~
+
+      "Stress response and regulation",
+
+    # ========================================================
+    # Membrane and periplasmic transport
+    # ========================================================
+
+    gene_lower %in% c(
+      "rbsa",
+      "rbsb",
+      "rbsc",
+      "male",
+      "malf",
+      "malg",
+      "malk",
+      "lamb",
+      "yhjx",
+      "manz",
+      "efeo",
+      "exut",
+      "mglb",
+      "mgla",
+      "gntt",
+      "gntp",
+      "nhaa",
+      "mgta",
+      "znta",
+      "fucp",
+      "sdac",
+      "frua",
+      "lldp",
+      "dcta",
+      "nupg",
+      "uraa",
+      "yhbe",
+      "yihn",
+      "plap",
+      "punc",
+      "mdla"
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bfructuronate transporter\\b|",
+        "\\bhigh-affinity gluconate transporter\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter periplasmic binding protein\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter membrane subunit\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter atp binding subunit\\b|",
+        "\\bribose abc transporter periplasmic binding protein\\b|",
+        "\\bribose abc transporter membrane subunit\\b|",
+        "\\bribose abc transporter atp binding subunit\\b|",
+        "\\bmaltose abc transporter periplasmic binding protein\\b|",
+        "\\bmaltose abc transporter membrane subunit malf\\b|",
+        "\\bmaltose abc transporter membrane subunit malg\\b|",
+        "\\bmaltose abc transporter atp binding subunit\\b|",
+        "\\bmaltose outer membrane channel/phage lambda receptor protein\\b|",
+        "\\bna\\(\\+\\):h\\(\\+\\) antiporter nhaa\\b|",
+        "\\bl-fucose:h\\(\\+\\) symporter\\b|",
+        "\\bl-serine:h\\(\\+\\) symporter sdac\\b|",
+        "\\blactate/glycolate:h\\(\\+\\) symporter lldp\\b|",
+        "\\bc4 dicarboxylate/orotate:h\\(\\+\\) symporter\\b|",
+        "\\bnucleoside:h\\(\\+\\) symporter nupg\\b|",
+        "\\buracil:h\\(\\+\\) symporter uraa\\b|",
+        "\\bputrescine:h\\(\\+\\) symporter plap\\b|",
+        "\\bpurine nucleoside transporter punc\\b|",
+        "\\bmg\\(2\\(\\+\\)\\) importing p-type atpase\\b|",
+        "\\bzn\\(2\\(\\+\\)\\)/cd\\(2\\(\\+\\)\\)/pb\\(2\\(\\+\\)\\) exporting p-type atpase\\b|",
+        "\\bputative transporter yhjx\\b|",
+        "\\bputative transporter yhbe\\b|",
+        "\\bputative transporter yihn\\b|",
+        "\\bfructose-specific pts multiphosphoryl transfer protein frua\\b"
+      )
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    # ========================================================
+    # Energy and nucleotide homeostasis
+    #
+    # This category is restricted to genes associated with:
+    #   - ATP, GTP, CTP, or nucleotide-pool maintenance
+    #   - Purine or pyrimidine salvage/biosynthesis
+    #   - Major energy-generating or energy-coupled pathways
+    #
+    # General carbon- and amino-acid-metabolism genes that do
+    # not directly support this interpretation are excluded.
+    # ========================================================
+
+    gene_lower %in% c(
+      "apt",
+      "deob",
+      "ndk",
+      "gmk",
+      "cmk",
+      "cara",
+      "carb",
+      "acs",
+      "fadb",
+      "fuma",
+      "fumc",
+      "pfla",
+      "lpda"
+    ) ~
+
+      "Energy and nucleotide homeostasis",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\badenine phosphoribosyltransferase\\b|",
+        "\\bphosphopentomutase\\b|",
+        "\\bnucleoside diphosphate kinase\\b|",
+        "\\bguanylate kinase\\b|",
+        "\\bcytidylate kinase\\b|",
+        "\\bcarbamoyl-phosphate synthetase small subunit\\b|",
+        "\\bcarbamoyl-phosphate synthetase large subunit\\b|",
+        "\\bacetyl-coa synthetase \\(amp-forming\\)\\b|",
+        "\\bfatty acid oxidation complex subunit alpha\\b|",
+        "\\bfatty acid oxidation complex subunit fadb\\b|",
+        "\\bfumarase a\\b|",
+        "\\bfumarase c\\b|",
+        "\\bpyruvate formate-lyase activating enzyme\\b|",
+        "\\blipoamide dehydrogenase\\b"
+      )
+    ) ~
+
+      "Energy and nucleotide homeostasis",
+
+    TRUE ~
+      NA_character_
+  )
+}
+
+# ============================================================
+# Fit edgeR model
+# ============================================================
+
+fit <- glmQLFit(
+  y,
+  design
+)
+
+# ============================================================
+# Run only the KpnNEO versus EGFP contrast
+#
+# Positive logFC means higher expression in KpnNEO relative
+# to EGFP.
+# ============================================================
+
+KpnNEO_test <- glmQLFTest(
+  fit,
+  contrast = c(
+    -1,
+    1,
+    0,
+    0,
+    0
+  )
+)
+
+dge_KpnNEO <- topTags(
+  KpnNEO_test,
+  n = Inf,
+  adjust.method = "BH",
+  sort.by = "PValue",
+  p.value = 1
+)$table %>%
+  rownames_to_column(
+    "GeneID"
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    )
+  ) %>%
+  left_join(
+    MG1655_annotation,
+    by = "GeneID"
+  ) %>%
+  mutate(
+    NEO = "KpnNEO",
+
+    gene = if_else(
+      is.na(gene) |
+        gene == "",
+      "N/A",
+      gene
+    ),
+
+    product = if_else(
+      is.na(product) |
+        product == "",
+      "N/A",
+      product
+    ),
+
+    chr = if_else(
+      is.na(chr) |
+        chr == "",
+      "N/A",
+      chr
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    ),
+
+    FDR_plot = pmax(
+      FDR,
+      .Machine$double.xmin
+    ),
+
+    Significant = (
+      abs(logFC) >= plot_logFC_threshold &
+        FDR < FDR_threshold
+    ),
+
+    Direction = case_when(
+      Significant &
+        logFC >= plot_logFC_threshold ~
+        "Upregulated",
+
+      Significant &
+        logFC <= -plot_logFC_threshold ~
+        "Downregulated",
+
+      TRUE ~
+        "Not significant"
+    ),
+
+    Function_category = classify_function(
+      gene_lower = gene_lower,
+      product_lower = product_lower
+    ),
+
+    Highlight_function = (
+      Significant &
+        !is.na(Function_category)
+    ),
+
+    Function_category = factor(
+      Function_category,
+      levels = c(
+        "Envelope and membrane stress",
+        "Stress response and regulation",
+        "Membrane and periplasmic transport",
+        "Energy and nucleotide homeostasis"
+      )
+    ),
+
+    point_id = paste(
+      NEO,
+      GeneID,
+      sep = "_"
+    ),
+
+    info = paste0(
+      "Condition: KpnNEO",
+      " | gene: ", gene,
+      " | product: ", product,
+      " | locus_tag: ", GeneID,
+      " | logFC: ", round(logFC, 4),
+      " | FDR: ", signif(FDR, 4),
+      " | direction: ", Direction,
+      " | category: ",
+      if_else(
+        is.na(Function_category),
+        "Other",
+        as.character(Function_category)
+      )
+    )
+  )
+
+# Preserve the previous dataframe naming convention
+dge_EGFP_v_KpnNEO <- dge_KpnNEO
+
+# ============================================================
+# Separate plotting layers
+# ============================================================
+
+# Genes below the logFC and/or FDR thresholds
+dge_KpnNEO_nonsignificant <- dge_KpnNEO %>%
+  filter(
+    !Significant
+  )
+
+# Significant genes not assigned to one of the four categories
+dge_KpnNEO_other_significant <- dge_KpnNEO %>%
+  filter(
+    Significant,
+    is.na(Function_category)
+  )
+
+# Significant genes assigned to a functional category
+dge_KpnNEO_function_highlighted <- dge_KpnNEO %>%
+  filter(
+    Highlight_function
+  )
+
+# ============================================================
+# KpnNEO volcano plot
+#
+# Functional category = fill color
+# Other significant   = gray
+# Nonsignificant      = light gray
+#
+# All points use the same shape because only KpnNEO is plotted.
+# ============================================================
+
+KpnNEO_volcano <- ggplot(
+  dge_KpnNEO,
+  aes(
+    x = logFC,
+    y = -log10(FDR_plot)
+  )
+) +
+
+  # ----------------------------------------------------------
+  # Nonsignificant genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_KpnNEO_nonsignificant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 1.3,
+    fill = "gray80",
+    color = "gray70",
+    stroke = 0.15,
+    alpha = 0.30
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant uncategorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_KpnNEO_other_significant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 2.2,
+    fill = "gray80",
+    color = "gray70",
+    stroke = 0.35,
+    alpha = 0.80
+  ) +
+
+  # ----------------------------------------------------------
+  # logFC thresholds at -4 and +4
+  # ----------------------------------------------------------
+
+  geom_vline(
+    xintercept = c(
+      -plot_logFC_threshold,
+      plot_logFC_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # FDR threshold
+  # ----------------------------------------------------------
+
+  geom_hline(
+    yintercept = -log10(
+      FDR_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant functionally categorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_KpnNEO_function_highlighted,
+    aes(
+      fill = Function_category,
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 3.2,
+    color = "black",
+    stroke = 0.45,
+    alpha = 0.95
+  ) +
+
+  # ----------------------------------------------------------
+  # Functional-category colors
+  # ----------------------------------------------------------
+
+  scale_fill_manual(
+    name = "Functional category",
+    values = c(
+      "Envelope and membrane stress" =
+        "lightblue",
+
+      "Stress response and regulation" =
+        "darkgreen",
+
+      "Membrane and periplasmic transport" =
+        "maroon",
+
+      "Energy and nucleotide homeostasis" =
+        "orange"
+    ),
+    drop = TRUE
+  ) +
+
+  guides(
+    fill = guide_legend(
+      override.aes = list(
+        shape = 21,
+        size = 4,
+        color = "black",
+        alpha = 1
+      )
+    )
+  ) +
+
+  labs(
+    title = "KpnNEO vs. EGFP",
+
+    x = expression(
+      log[2] * "(expression fold change)"
+    ),
+
+    y = expression(
+      -log[10] * "(FDR)"
+    )
+  ) +
+
+  theme(
+    aspect.ratio = 1 / 2,
+
+    legend.position = "right",
+
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold",
+      size = 13
+    ),
+
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+
+    panel.background = element_rect(
+      fill = "white",
+      colour = "black"
+    ),
+
+    text = element_text(
+      size = 12
+    ),
+
+    axis.title = element_text(
+      face = "bold",
+      size = 12
+    ),
+
+    legend.title = element_text(
+      face = "bold",
+      size = 11
+    ),
+
+    legend.text = element_text(
+      size = 9
+    )
+  )
+
+# ============================================================
+# Display static plot
+# ============================================================
+
+print(
+  KpnNEO_volcano
+)
+
+# ============================================================
+# Display interactive plot in the RStudio Viewer
+#
+# No output file is created.
+# ============================================================
+
+KpnNEO_volcano_interactive <- girafe(
+  ggobj = KpnNEO_volcano,
+  width_svg = 10,
+  height_svg = 5.8,
+  options = list(
+    opts_hover(
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:1.5px;"
+      )
+    ),
+
+    opts_selection(
+      type = "single",
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:2px;"
+      )
+    ),
+
+    opts_tooltip(
+      opacity = 0.95,
+      use_fill = TRUE,
+      use_stroke = TRUE,
+      css = paste0(
+        "background-color:black;",
+        "color:white;",
+        "padding:8px;",
+        "border-radius:3px;",
+        "font-size:12px;",
+        "max-width:700px;",
+        "white-space:normal;"
+      )
+    )
+  )
+)
+
+KpnNEO_volcano_interactive
+```
+
+```{r}
+library(edgeR)
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(ggiraph)
+library(stringr)
+
+# ============================================================
+# Settings
+# ============================================================
+
+annotation_file <- "./data/input/Annotations.csv"
+
+plot_logFC_threshold <- 2
+FDR_threshold <- 0.05
+
+# ============================================================
+# Check required objects
+# ============================================================
+
+required_objects <- c(
+  "y",
+  "design"
+)
+
+missing_objects <- required_objects[
+  !vapply(
+    required_objects,
+    exists,
+    logical(1),
+    inherits = TRUE
+  )
+]
+
+if (length(missing_objects) > 0) {
+  stop(
+    paste0(
+      "Missing required object(s): ",
+      paste(
+        missing_objects,
+        collapse = ", "
+      )
+    )
+  )
+}
+
+if (!file.exists(annotation_file)) {
+  stop(
+    paste0(
+      "Annotation file was not found: ",
+      annotation_file
+    )
+  )
+}
+
+# ============================================================
+# Read annotation file
+#
+# The annotation file is expected to be a headerless,
+# nine-column GFF-style CSV file.
+# ============================================================
+
+annotation_raw <- read.csv(
+  annotation_file,
+  header = FALSE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE,
+  quote = "\"",
+  comment.char = ""
+)
+
+if (ncol(annotation_raw) != 9) {
+  stop(
+    paste0(
+      "The annotation file should contain 9 columns, but ",
+      ncol(annotation_raw),
+      " columns were detected."
+    )
+  )
+}
+
+colnames(annotation_raw) <- c(
+  "seqid",
+  "description",
+  "feature_type",
+  "start",
+  "end",
+  "score",
+  "strand",
+  "phase",
+  "attributes"
+)
+
+# ============================================================
+# Extract one attribute from the GFF attributes column
+# ============================================================
+
+extract_attribute <- function(
+    attributes,
+    key
+) {
+
+  attributes <- as.character(
+    attributes
+  )
+
+  pattern <- paste0(
+    "(?:^|;)",
+    key,
+    "=([^;]+)"
+  )
+
+  value <- str_match(
+    attributes,
+    pattern
+  )[, 2]
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2C",
+      ignore_case = TRUE
+    ),
+    ","
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%3B",
+      ignore_case = TRUE
+    ),
+    ";"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%28",
+      ignore_case = TRUE
+    ),
+    "("
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%29",
+      ignore_case = TRUE
+    ),
+    ")"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2B",
+      ignore_case = TRUE
+    ),
+    "+"
+  )
+
+  value <- str_replace_all(
+    value,
+    "\u00A0",
+    " "
+  )
+
+  str_squish(
+    value
+  )
+}
+
+# ============================================================
+# Parse structured annotation fields
+# ============================================================
+
+annotation_parsed <- annotation_raw %>%
+  mutate(
+    gene = extract_attribute(
+      attributes,
+      "gene"
+    ),
+
+    locus_tag = extract_attribute(
+      attributes,
+      "locus_tag"
+    ),
+
+    product = extract_attribute(
+      attributes,
+      "product"
+    )
+  )
+
+# ============================================================
+# Return the first nonmissing annotation for each locus
+# ============================================================
+
+first_nonmissing <- function(x) {
+
+  x <- as.character(
+    x
+  )
+
+  x <- x[
+    !is.na(x) &
+      x != ""
+  ]
+
+  if (length(x) == 0) {
+    return("N/A")
+  }
+
+  x[1]
+}
+
+# ============================================================
+# Collapse annotation rows into one row per locus tag
+# ============================================================
+
+MG1655_annotation <- annotation_parsed %>%
+  filter(
+    !is.na(locus_tag),
+    locus_tag != ""
+  ) %>%
+  group_by(
+    locus_tag
+  ) %>%
+  summarise(
+    chr = first_nonmissing(
+      seqid
+    ),
+
+    gene = first_nonmissing(
+      gene
+    ),
+
+    product = first_nonmissing(
+      product
+    ),
+
+    .groups = "drop"
+  ) %>%
+  rename(
+    GeneID = locus_tag
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    )
+  ) %>%
+  distinct(
+    GeneID,
+    .keep_all = TRUE
+  )
+
+# ============================================================
+# Functional classification
+#
+# Categories:
+#   1. Envelope and membrane stress
+#   2. Stress response and regulation
+#   3. Membrane and periplasmic transport
+#   4. Energy and nucleotide homeostasis
+# ============================================================
+
+classify_function <- function(
+    gene_lower,
+    product_lower
+) {
+
+  gene_lower <- ifelse(
+    is.na(gene_lower),
+    "",
+    tolower(
+      gene_lower
+    )
+  )
+
+  product_lower <- ifelse(
+    is.na(product_lower),
+    "",
+    tolower(
+      product_lower
+    )
+  )
+
+  case_when(
+
+    # ========================================================
+    # Envelope and membrane stress
+    # ========================================================
+
+    gene_lower %in% c(
+      "pspa",
+      "pspb",
+      "pspc",
+      "pspd",
+      "pspe",
+      "pspg",
+      "cpxp",
+      "yagu",
+      "yjfj",
+      "osmb",
+      "bsma",
+      "yiad",
+      "alx",
+      "asr",
+      "lpxc",
+      "yqae",
+      "bord",
+      "atpi"
+    ) ~
+
+      "Envelope and membrane stress",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bpspa family protein\\b|",
+        "\\bphage shock protein a\\b|",
+        "\\bphage shock protein b\\b|",
+        "\\bphage shock protein c\\b|",
+        "\\bphage shock protein d\\b|",
+        "\\bphage shock protein e\\b|",
+        "\\bphage shock protein g\\b|",
+        "\\bperiplasmic protein cpxp\\b|",
+        "\\bosmotically[- ]inducible lipoprotein\\b|",
+        "\\bmembrane[- ]bound redox modulator\\b|",
+        "\\bperiplasmic chaperone asr\\b|",
+        "\\bduf1471 domain[- ]containing putative lipoprotein\\b|",
+        "\\bpf13488 family lipoprotein\\b|",
+        "\\budp-3-o-acyl-n-acetylglucosamine deacetylase\\b|",
+        "\\batp synthase accessory factor atpi\\b"
+      )
+    ) ~
+
+      "Envelope and membrane stress",
+
+    # ========================================================
+    # Stress response and regulation
+    # ========================================================
+
+    gene_lower %in% c(
+      "soxs",
+      "ibpa",
+      "ibpb",
+      "ytfk",
+      "dusb",
+      "fis",
+      "mara",
+      "marr",
+      "marb",
+      "rpoh",
+      "iscr",
+      "nahr",
+      "soda",
+      "trxc",
+      "nrdh",
+      "nrdi",
+      "cyar",
+      "glmz",
+      "rbsz",
+      "rttr",
+      "dksa",
+      "grea",
+      "dead",
+      "obge",
+      "yjfn",
+      "yjhq",
+      "chps",
+      "slyx",
+      "yhab"
+    ) ~
+
+      "Stress response and regulation",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bdna-binding transcriptional dual regulator soxs\\b|",
+        "\\brna polymerase sigma factor rpoh\\b|",
+        "\\bstringent response modulator ytfk\\b|",
+        "\\bsuperoxide dismutase \\(mn\\)\\b|",
+        "\\bglutaredoxin-like protein nrdh\\b|",
+        "\\breduced thioredoxin 2\\b|",
+        "\\bdimanganese-tyrosyl radical cofactor maintenance flavodoxin nrdi\\b|",
+        "\\btranscription elongation factor grea\\b|",
+        "\\brna polymerase-binding transcription factor dksa\\b|",
+        "\\buniversal stress protein\\b|",
+        "\\bstress-induced protein\\b|",
+        "\\bstress response protein\\b|",
+        "\\bsmall regulatory rna cyar\\b|",
+        "\\bsmall regulatory rna glmz\\b|",
+        "\\bsmall regulatory rna rbsz\\b|",
+        "\\bsmall rna rttr\\b"
+      )
+    ) ~
+
+      "Stress response and regulation",
+
+    # ========================================================
+    # Membrane and periplasmic transport
+    # ========================================================
+
+    gene_lower %in% c(
+      "rbsa",
+      "rbsb",
+      "rbsc",
+      "male",
+      "malf",
+      "malg",
+      "malk",
+      "lamb",
+      "yhjx",
+      "manz",
+      "efeo",
+      "exut",
+      "mglb",
+      "mgla",
+      "gntt",
+      "gntp",
+      "nhaa",
+      "mgta",
+      "znta",
+      "fucp",
+      "sdac",
+      "frua",
+      "lldp",
+      "dcta",
+      "nupg",
+      "uraa",
+      "yhbe",
+      "yihn",
+      "plap",
+      "punc",
+      "mdla"
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bfructuronate transporter\\b|",
+        "\\bhigh-affinity gluconate transporter\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter periplasmic binding protein\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter membrane subunit\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter atp binding subunit\\b|",
+        "\\bribose abc transporter periplasmic binding protein\\b|",
+        "\\bribose abc transporter membrane subunit\\b|",
+        "\\bribose abc transporter atp binding subunit\\b|",
+        "\\bmaltose abc transporter periplasmic binding protein\\b|",
+        "\\bmaltose abc transporter membrane subunit malf\\b|",
+        "\\bmaltose abc transporter membrane subunit malg\\b|",
+        "\\bmaltose abc transporter atp binding subunit\\b|",
+        "\\bmaltose outer membrane channel/phage lambda receptor protein\\b|",
+        "\\bna\\(\\+\\):h\\(\\+\\) antiporter nhaa\\b|",
+        "\\bl-fucose:h\\(\\+\\) symporter\\b|",
+        "\\bl-serine:h\\(\\+\\) symporter sdac\\b|",
+        "\\blactate/glycolate:h\\(\\+\\) symporter lldp\\b|",
+        "\\bc4 dicarboxylate/orotate:h\\(\\+\\) symporter\\b|",
+        "\\bnucleoside:h\\(\\+\\) symporter nupg\\b|",
+        "\\buracil:h\\(\\+\\) symporter uraa\\b|",
+        "\\bputrescine:h\\(\\+\\) symporter plap\\b|",
+        "\\bpurine nucleoside transporter punc\\b|",
+        "\\bmg\\(2\\(\\+\\)\\) importing p-type atpase\\b|",
+        "\\bzn\\(2\\(\\+\\)\\)/cd\\(2\\(\\+\\)\\)/pb\\(2\\(\\+\\)\\) exporting p-type atpase\\b|",
+        "\\bputative transporter yhjx\\b|",
+        "\\bputative transporter yhbe\\b|",
+        "\\bputative transporter yihn\\b|",
+        "\\bfructose-specific pts multiphosphoryl transfer protein frua\\b"
+      )
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    # ========================================================
+    # Energy and nucleotide homeostasis
+    # ========================================================
+
+    gene_lower %in% c(
+      "apt",
+      "deob",
+      "ndk",
+      "gmk",
+      "cmk",
+      "cara",
+      "carb",
+      "acs",
+      "fadb",
+      "fuma",
+      "fumc",
+      "pfla",
+      "lpda"
+    ) ~
+
+      "Energy and nucleotide homeostasis",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\badenine phosphoribosyltransferase\\b|",
+        "\\bphosphopentomutase\\b|",
+        "\\bnucleoside diphosphate kinase\\b|",
+        "\\bguanylate kinase\\b|",
+        "\\bcytidylate kinase\\b|",
+        "\\bcarbamoyl-phosphate synthetase small subunit\\b|",
+        "\\bcarbamoyl-phosphate synthetase large subunit\\b|",
+        "\\bacetyl-coa synthetase \\(amp-forming\\)\\b|",
+        "\\bfatty acid oxidation complex subunit alpha\\b|",
+        "\\bfatty acid oxidation complex subunit fadb\\b|",
+        "\\bfumarase a\\b|",
+        "\\bfumarase c\\b|",
+        "\\bpyruvate formate-lyase activating enzyme\\b|",
+        "\\blipoamide dehydrogenase\\b"
+      )
+    ) ~
+
+      "Energy and nucleotide homeostasis",
+
+    TRUE ~
+      NA_character_
+  )
+}
+
+# ============================================================
+# Fit edgeR model
+# ============================================================
+
+fit <- glmQLFit(
+  y,
+  design
+)
+
+# ============================================================
+# Run C3.1bNEO versus EGFP contrast
+#
+# Assumed design-column order:
+#   1. EGFP
+#   2. KpnNEO
+#   3. C3.1bNEO
+#   4. C4.1bNEO
+#   5. C7.6bNEO
+#
+# Positive logFC means higher expression in C3.1bNEO
+# relative to EGFP.
+# ============================================================
+
+C3_1bNEO_test <- glmQLFTest(
+  fit,
+  contrast = c(
+    -1,
+    0,
+    1,
+    0,
+    0
+  )
+)
+
+dge_C3_1bNEO <- topTags(
+  C3_1bNEO_test,
+  n = Inf,
+  adjust.method = "BH",
+  sort.by = "PValue",
+  p.value = 1
+)$table %>%
+  rownames_to_column(
+    "GeneID"
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    )
+  ) %>%
+  left_join(
+    MG1655_annotation,
+    by = "GeneID"
+  ) %>%
+  mutate(
+    NEO = "C3.1bNEO",
+
+    gene = if_else(
+      is.na(gene) |
+        gene == "",
+      "N/A",
+      gene
+    ),
+
+    product = if_else(
+      is.na(product) |
+        product == "",
+      "N/A",
+      product
+    ),
+
+    chr = if_else(
+      is.na(chr) |
+        chr == "",
+      "N/A",
+      chr
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    ),
+
+    FDR_plot = pmax(
+      FDR,
+      .Machine$double.xmin
+    ),
+
+    Significant = (
+      abs(logFC) >= plot_logFC_threshold &
+        FDR < FDR_threshold
+    ),
+
+    Direction = case_when(
+      Significant &
+        logFC >= plot_logFC_threshold ~
+        "Upregulated",
+
+      Significant &
+        logFC <= -plot_logFC_threshold ~
+        "Downregulated",
+
+      TRUE ~
+        "Not significant"
+    ),
+
+    Function_category = classify_function(
+      gene_lower = gene_lower,
+      product_lower = product_lower
+    ),
+
+    Highlight_function = (
+      Significant &
+        !is.na(Function_category)
+    ),
+
+    Function_category = factor(
+      Function_category,
+      levels = c(
+        "Envelope and membrane stress",
+        "Stress response and regulation",
+        "Membrane and periplasmic transport",
+        "Energy and nucleotide homeostasis"
+      )
+    ),
+
+    point_id = paste(
+      NEO,
+      GeneID,
+      sep = "_"
+    ),
+
+    info = paste0(
+      "Condition: C3.1bNEO",
+      " | gene: ", gene,
+      " | product: ", product,
+      " | locus_tag: ", GeneID,
+      " | logFC: ", round(logFC, 4),
+      " | FDR: ", signif(FDR, 4),
+      " | direction: ", Direction,
+      " | category: ",
+      if_else(
+        is.na(Function_category),
+        "Other",
+        as.character(Function_category)
+      )
+    )
+  )
+
+# Preserve the previous dataframe naming convention
+dge_EGFP_v_C3_1bNEO <- dge_C3_1bNEO
+
+# ============================================================
+# Separate plotting layers
+# ============================================================
+
+dge_C3_1bNEO_nonsignificant <- dge_C3_1bNEO %>%
+  filter(
+    !Significant
+  )
+
+dge_C3_1bNEO_other_significant <- dge_C3_1bNEO %>%
+  filter(
+    Significant,
+    is.na(Function_category)
+  )
+
+dge_C3_1bNEO_function_highlighted <- dge_C3_1bNEO %>%
+  filter(
+    Highlight_function
+  )
+
+# ============================================================
+# C3.1bNEO volcano plot
+#
+# Functional category = fill color
+# Other significant   = gray
+# Nonsignificant      = light gray
+# ============================================================
+
+C3_1bNEO_volcano <- ggplot(
+  dge_C3_1bNEO,
+  aes(
+    x = logFC,
+    y = -log10(FDR_plot)
+  )
+) +
+
+  # ----------------------------------------------------------
+  # Nonsignificant genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_C3_1bNEO_nonsignificant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 1.3,
+    fill = "gray80",
+    color = "gray70",
+    stroke = 0.15,
+    alpha = 0.30
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant uncategorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_C3_1bNEO_other_significant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 2.2,
+    fill = "gray80",
+    color = "gray70",
+    stroke = 0.35,
+    alpha = 0.80
+  ) +
+
+  # ----------------------------------------------------------
+  # logFC thresholds at -4 and +4
+  # ----------------------------------------------------------
+
+  geom_vline(
+    xintercept = c(
+      -plot_logFC_threshold,
+      plot_logFC_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # FDR threshold
+  # ----------------------------------------------------------
+
+  geom_hline(
+    yintercept = -log10(
+      FDR_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant functionally categorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_C3_1bNEO_function_highlighted,
+    aes(
+      fill = Function_category,
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 3.2,
+    color = "black",
+    stroke = 0.45,
+    alpha = 0.95
+  ) +
+
+  # ----------------------------------------------------------
+  # Functional-category colors
+  # ----------------------------------------------------------
+
+  scale_fill_manual(
+    name = "Functional category",
+    values = c(
+      "Envelope and membrane stress" =
+        "lightblue",
+
+      "Stress response and regulation" =
+        "darkgreen",
+
+      "Membrane and periplasmic transport" =
+        "maroon",
+
+      "Energy and nucleotide homeostasis" =
+        "orange"
+    ),
+    drop = TRUE
+  ) +
+
+  guides(
+    fill = guide_legend(
+      override.aes = list(
+        shape = 21,
+        size = 4,
+        color = "black",
+        alpha = 1
+      )
+    )
+  ) +
+
+  labs(
+    title = "C3.1bNEO vs. EGFP",
+
+    x = expression(
+      log[2] * "(expression fold change)"
+    ),
+
+    y = expression(
+      -log[10] * "(FDR)"
+    )
+  ) +
+
+  theme(
+    aspect.ratio = 1 / 2,
+
+    legend.position = "right",
+
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold",
+      size = 13
+    ),
+
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+
+    panel.background = element_rect(
+      fill = "white",
+      colour = "black"
+    ),
+
+    text = element_text(
+      size = 12
+    ),
+
+    axis.title = element_text(
+      face = "bold",
+      size = 12
+    ),
+
+    legend.title = element_text(
+      face = "bold",
+      size = 11
+    ),
+
+    legend.text = element_text(
+      size = 9
+    )
+  )
+
+# ============================================================
+# Display static plot
+# ============================================================
+
+print(
+  C3_1bNEO_volcano
+)
+
+# ============================================================
+# Display interactive plot in the RStudio Viewer
+#
+# No output file is created.
+# ============================================================
+
+C3_1bNEO_volcano_interactive <- girafe(
+  ggobj = C3_1bNEO_volcano,
+  width_svg = 10,
+  height_svg = 5.8,
+  options = list(
+    opts_hover(
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:1.5px;"
+      )
+    ),
+
+    opts_selection(
+      type = "single",
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:2px;"
+      )
+    ),
+
+    opts_tooltip(
+      opacity = 0.95,
+      use_fill = TRUE,
+      use_stroke = TRUE,
+      css = paste0(
+        "background-color:black;",
+        "color:white;",
+        "padding:8px;",
+        "border-radius:3px;",
+        "font-size:12px;",
+        "max-width:700px;",
+        "white-space:normal;"
+      )
+    )
+  )
+)
+
+C3_1bNEO_volcano_interactive
+```
+
+```{r}
+library(edgeR)
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(ggiraph)
+library(stringr)
+
+# ============================================================
+# Settings
+# ============================================================
+
+annotation_file <- "./data/input/Annotations.csv"
+
+plot_logFC_threshold <- 2
+FDR_threshold <- 0.05
+
+# ============================================================
+# Check required objects
+# ============================================================
+
+required_objects <- c(
+  "y",
+  "design"
+)
+
+missing_objects <- required_objects[
+  !vapply(
+    required_objects,
+    exists,
+    logical(1),
+    inherits = TRUE
+  )
+]
+
+if (length(missing_objects) > 0) {
+  stop(
+    paste0(
+      "Missing required object(s): ",
+      paste(
+        missing_objects,
+        collapse = ", "
+      )
+    )
+  )
+}
+
+if (!file.exists(annotation_file)) {
+  stop(
+    paste0(
+      "Annotation file was not found: ",
+      annotation_file
+    )
+  )
+}
+
+# ============================================================
+# Read annotation file
+#
+# The annotation file is expected to be a headerless,
+# nine-column GFF-style CSV file.
+# ============================================================
+
+annotation_raw <- read.csv(
+  annotation_file,
+  header = FALSE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE,
+  quote = "\"",
+  comment.char = ""
+)
+
+if (ncol(annotation_raw) != 9) {
+  stop(
+    paste0(
+      "The annotation file should contain 9 columns, but ",
+      ncol(annotation_raw),
+      " columns were detected."
+    )
+  )
+}
+
+colnames(annotation_raw) <- c(
+  "seqid",
+  "description",
+  "feature_type",
+  "start",
+  "end",
+  "score",
+  "strand",
+  "phase",
+  "attributes"
+)
+
+# ============================================================
+# Extract one attribute from the GFF attributes column
+# ============================================================
+
+extract_attribute <- function(
+    attributes,
+    key
+) {
+
+  attributes <- as.character(
+    attributes
+  )
+
+  pattern <- paste0(
+    "(?:^|;)",
+    key,
+    "=([^;]+)"
+  )
+
+  value <- str_match(
+    attributes,
+    pattern
+  )[, 2]
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2C",
+      ignore_case = TRUE
+    ),
+    ","
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%3B",
+      ignore_case = TRUE
+    ),
+    ";"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%28",
+      ignore_case = TRUE
+    ),
+    "("
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%29",
+      ignore_case = TRUE
+    ),
+    ")"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2B",
+      ignore_case = TRUE
+    ),
+    "+"
+  )
+
+  value <- str_replace_all(
+    value,
+    "\u00A0",
+    " "
+  )
+
+  str_squish(
+    value
+  )
+}
+
+# ============================================================
+# Parse structured annotation fields
+# ============================================================
+
+annotation_parsed <- annotation_raw %>%
+  mutate(
+    gene = extract_attribute(
+      attributes,
+      "gene"
+    ),
+
+    locus_tag = extract_attribute(
+      attributes,
+      "locus_tag"
+    ),
+
+    product = extract_attribute(
+      attributes,
+      "product"
+    )
+  )
+
+# ============================================================
+# Return the first nonmissing annotation for each locus
+# ============================================================
+
+first_nonmissing <- function(x) {
+
+  x <- as.character(
+    x
+  )
+
+  x <- x[
+    !is.na(x) &
+      x != ""
+  ]
+
+  if (length(x) == 0) {
+    return("N/A")
+  }
+
+  x[1]
+}
+
+# ============================================================
+# Collapse annotation rows into one row per locus tag
+# ============================================================
+
+MG1655_annotation <- annotation_parsed %>%
+  filter(
+    !is.na(locus_tag),
+    locus_tag != ""
+  ) %>%
+  group_by(
+    locus_tag
+  ) %>%
+  summarise(
+    chr = first_nonmissing(
+      seqid
+    ),
+
+    gene = first_nonmissing(
+      gene
+    ),
+
+    product = first_nonmissing(
+      product
+    ),
+
+    .groups = "drop"
+  ) %>%
+  rename(
+    GeneID = locus_tag
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    )
+  ) %>%
+  distinct(
+    GeneID,
+    .keep_all = TRUE
+  )
+
+# ============================================================
+# Functional classification
+#
+# Categories:
+#   1. Envelope and membrane stress
+#   2. Stress response and regulation
+#   3. Membrane and periplasmic transport
+#   4. Energy and nucleotide homeostasis
+# ============================================================
+
+classify_function <- function(
+    gene_lower,
+    product_lower
+) {
+
+  gene_lower <- ifelse(
+    is.na(gene_lower),
+    "",
+    tolower(
+      gene_lower
+    )
+  )
+
+  product_lower <- ifelse(
+    is.na(product_lower),
+    "",
+    tolower(
+      product_lower
+    )
+  )
+
+  case_when(
+
+    # ========================================================
+    # Envelope and membrane stress
+    # ========================================================
+
+    gene_lower %in% c(
+      "pspa",
+      "pspb",
+      "pspc",
+      "pspd",
+      "pspe",
+      "pspg",
+      "cpxp",
+      "yagu",
+      "yjfj",
+      "osmb",
+      "bsma",
+      "yiad",
+      "alx",
+      "asr",
+      "lpxc",
+      "yqae",
+      "bord",
+      "atpi"
+    ) ~
+
+      "Envelope and membrane stress",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bpspa family protein\\b|",
+        "\\bphage shock protein a\\b|",
+        "\\bphage shock protein b\\b|",
+        "\\bphage shock protein c\\b|",
+        "\\bphage shock protein d\\b|",
+        "\\bphage shock protein e\\b|",
+        "\\bphage shock protein g\\b|",
+        "\\bperiplasmic protein cpxp\\b|",
+        "\\bosmotically[- ]inducible lipoprotein\\b|",
+        "\\bmembrane[- ]bound redox modulator\\b|",
+        "\\bperiplasmic chaperone asr\\b|",
+        "\\bduf1471 domain[- ]containing putative lipoprotein\\b|",
+        "\\bpf13488 family lipoprotein\\b|",
+        "\\budp-3-o-acyl-n-acetylglucosamine deacetylase\\b|",
+        "\\batp synthase accessory factor atpi\\b"
+      )
+    ) ~
+
+      "Envelope and membrane stress",
+
+    # ========================================================
+    # Stress response and regulation
+    # ========================================================
+
+    gene_lower %in% c(
+      "soxs",
+      "ibpa",
+      "ibpb",
+      "ytfk",
+      "dusb",
+      "fis",
+      "mara",
+      "marr",
+      "marb",
+      "rpoh",
+      "iscr",
+      "nahr",
+      "soda",
+      "trxc",
+      "nrdh",
+      "nrdi",
+      "cyar",
+      "glmz",
+      "rbsz",
+      "rttr",
+      "dksa",
+      "grea",
+      "dead",
+      "obge",
+      "yjfn",
+      "yjhq",
+      "chps",
+      "slyx",
+      "yhab"
+    ) ~
+
+      "Stress response and regulation",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bdna-binding transcriptional dual regulator soxs\\b|",
+        "\\brna polymerase sigma factor rpoh\\b|",
+        "\\bstringent response modulator ytfk\\b|",
+        "\\bsuperoxide dismutase \\(mn\\)\\b|",
+        "\\bglutaredoxin-like protein nrdh\\b|",
+        "\\breduced thioredoxin 2\\b|",
+        "\\bdimanganese-tyrosyl radical cofactor maintenance flavodoxin nrdi\\b|",
+        "\\btranscription elongation factor grea\\b|",
+        "\\brna polymerase-binding transcription factor dksa\\b|",
+        "\\buniversal stress protein\\b|",
+        "\\bstress-induced protein\\b|",
+        "\\bstress response protein\\b|",
+        "\\bsmall regulatory rna cyar\\b|",
+        "\\bsmall regulatory rna glmz\\b|",
+        "\\bsmall regulatory rna rbsz\\b|",
+        "\\bsmall rna rttr\\b"
+      )
+    ) ~
+
+      "Stress response and regulation",
+
+    # ========================================================
+    # Membrane and periplasmic transport
+    # ========================================================
+
+    gene_lower %in% c(
+      "rbsa",
+      "rbsb",
+      "rbsc",
+      "male",
+      "malf",
+      "malg",
+      "malk",
+      "lamb",
+      "yhjx",
+      "manz",
+      "efeo",
+      "exut",
+      "mglb",
+      "mgla",
+      "gntt",
+      "gntp",
+      "nhaa",
+      "mgta",
+      "znta",
+      "fucp",
+      "sdac",
+      "frua",
+      "lldp",
+      "dcta",
+      "nupg",
+      "uraa",
+      "yhbe",
+      "yihn",
+      "plap",
+      "punc",
+      "mdla"
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bfructuronate transporter\\b|",
+        "\\bhigh-affinity gluconate transporter\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter periplic binding protein\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter membrane subunit\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter atp binding subunit\\b|",
+        "\\bribose abc transporter periplasmic binding protein\\b|",
+        "\\bribose abc transporter membrane subunit\\b|",
+        "\\bribose abc transporter atp binding subunit\\b|",
+        "\\bmaltose abc transporter periplasmic binding protein\\b|",
+        "\\bmaltose abc transporter membrane subunit malf\\b|",
+        "\\bmaltose abc transporter membrane subunit malg\\b|",
+        "\\bmaltose abc transporter atp binding subunit\\b|",
+        "\\bmaltose outer membrane channel/phage lambda receptor protein\\b|",
+        "\\bna\\(\\+\\):h\\(\\+\\) antiporter nhaa\\b|",
+        "\\bl-fucose:h\\(\\+\\) symporter\\b|",
+        "\\bl-serine:h\\(\\+\\) symporter sdac\\b|",
+        "\\blactate/glycolate:h\\(\\+\\) symporter lldp\\b|",
+        "\\bc4 dicarboxylate/orotate:h\\(\\+\\) symporter\\b|",
+        "\\bnucleoside:h\\(\\+\\) symporter nupg\\b|",
+        "\\buracil:h\\(\\+\\) symporter uraa\\b|",
+        "\\bputrescine:h\\(\\+\\) symporter plap\\b|",
+        "\\bpurine nucleoside transporter punc\\b|",
+        "\\bmg\\(2\\(\\+\\)\\) importing p-type atpase\\b|",
+        "\\bzn\\(2\\(\\+\\)\\)/cd\\(2\\(\\+\\)\\)/pb\\(2\\(\\+\\)\\) exporting p-type atpase\\b|",
+        "\\bputative transporter yhjx\\b|",
+        "\\bputative transporter yhbe\\b|",
+        "\\bputative transporter yihn\\b|",
+        "\\bfructose-specific pts multiphosphoryl transfer protein frua\\b"
+      )
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    # ========================================================
+    # Energy and nucleotide homeostasis
+    # ========================================================
+
+    gene_lower %in% c(
+      "apt",
+      "deob",
+      "ndk",
+      "gmk",
+      "cmk",
+      "cara",
+      "carb",
+      "acs",
+      "fadb",
+      "fuma",
+      "fumc",
+      "pfla",
+      "lpda"
+    ) ~
+
+      "Energy and nucleotide homeostasis",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\badenine phosphoribosyltransferase\\b|",
+        "\\bphosphopentomutase\\b|",
+        "\\bnucleoside diphosphate kinase\\b|",
+        "\\bguanylate kinase\\b|",
+        "\\bcytidylate kinase\\b|",
+        "\\bcarbamoyl-phosphate synthetase small subunit\\b|",
+        "\\bcarbamoyl-phosphate synthetase large subunit\\b|",
+        "\\bacetyl-coa synthetase \\(amp-forming\\)\\b|",
+        "\\bfatty acid oxidation complex subunit alpha\\b|",
+        "\\bfatty acid oxidation complex subunit fadb\\b|",
+        "\\bfumarase a\\b|",
+        "\\bfumarase c\\b|",
+        "\\bpyruvate formate-lyase activating enzyme\\b|",
+        "\\blipoamide dehydrogenase\\b"
+      )
+    ) ~
+
+      "Energy and nucleotide homeostasis",
+
+    TRUE ~
+      NA_character_
+  )
+}
+
+# ============================================================
+# Fit edgeR model
+# ============================================================
+
+fit <- glmQLFit(
+  y,
+  design
+)
+
+# ============================================================
+# Run C4.1bNEO versus EGFP contrast
+#
+# Assumed design-column order:
+#   1. EGFP
+#   2. KpnNEO
+#   3. C3.1bNEO
+#   4. C4.1bNEO
+#   5. C7.6bNEO
+#
+# Positive logFC means higher expression in C4.1bNEO
+# relative to EGFP.
+# ============================================================
+
+C4_1bNEO_test <- glmQLFTest(
+  fit,
+  contrast = c(
+    -1,
+    0,
+    0,
+    1,
+    0
+  )
+)
+
+dge_C4_1bNEO <- topTags(
+  C4_1bNEO_test,
+  n = Inf,
+  adjust.method = "BH",
+  sort.by = "PValue",
+  p.value = 1
+)$table %>%
+  rownames_to_column(
+    "GeneID"
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    )
+  ) %>%
+  left_join(
+    MG1655_annotation,
+    by = "GeneID"
+  ) %>%
+  mutate(
+    NEO = "C4.1bNEO",
+
+    gene = if_else(
+      is.na(gene) |
+        gene == "",
+      "N/A",
+      gene
+    ),
+
+    product = if_else(
+      is.na(product) |
+        product == "",
+      "N/A",
+      product
+    ),
+
+    chr = if_else(
+      is.na(chr) |
+        chr == "",
+      "N/A",
+      chr
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    ),
+
+    FDR_plot = pmax(
+      FDR,
+      .Machine$double.xmin
+    ),
+
+    Significant = (
+      abs(logFC) >= plot_logFC_threshold &
+        FDR < FDR_threshold
+    ),
+
+    Direction = case_when(
+      Significant &
+        logFC >= plot_logFC_threshold ~
+        "Upregulated",
+
+      Significant &
+        logFC <= -plot_logFC_threshold ~
+        "Downregulated",
+
+      TRUE ~
+        "Not significant"
+    ),
+
+    Function_category = classify_function(
+      gene_lower = gene_lower,
+      product_lower = product_lower
+    ),
+
+    Highlight_function = (
+      Significant &
+        !is.na(Function_category)
+    ),
+
+    Function_category = factor(
+      Function_category,
+      levels = c(
+        "Envelope and membrane stress",
+        "Stress response and regulation",
+        "Membrane and periplasmic transport",
+        "Energy and nucleotide homeostasis"
+      )
+    ),
+
+    point_id = paste(
+      NEO,
+      GeneID,
+      sep = "_"
+    ),
+
+    info = paste0(
+      "Condition: C4.1bNEO",
+      " | gene: ", gene,
+      " | product: ", product,
+      " | locus_tag: ", GeneID,
+      " | logFC: ", round(logFC, 4),
+      " | FDR: ", signif(FDR, 4),
+      " | direction: ", Direction,
+      " | category: ",
+      if_else(
+        is.na(Function_category),
+        "Other",
+        as.character(Function_category)
+      )
+    )
+  )
+
+# Preserve the previous dataframe naming convention
+dge_EGFP_v_C4_1bNEO <- dge_C4_1bNEO
+
+# ============================================================
+# Separate plotting layers
+# ============================================================
+
+dge_C4_1bNEO_nonsignificant <- dge_C4_1bNEO %>%
+  filter(
+    !Significant
+  )
+
+dge_C4_1bNEO_other_significant <- dge_C4_1bNEO %>%
+  filter(
+    Significant,
+    is.na(Function_category)
+  )
+
+dge_C4_1bNEO_function_highlighted <- dge_C4_1bNEO %>%
+  filter(
+    Highlight_function
+  )
+
+# ============================================================
+# C4.1bNEO volcano plot
+#
+# Functional category = fill color
+# Other significant   = gray
+# Nonsignificant      = light gray
+# ============================================================
+
+C4_1bNEO_volcano <- ggplot(
+  dge_C4_1bNEO,
+  aes(
+    x = logFC,
+    y = -log10(FDR_plot)
+  )
+) +
+
+  # ----------------------------------------------------------
+  # Nonsignificant genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_C4_1bNEO_nonsignificant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 1.3,
+    fill = "gray80",
+    color = "gray70",
+    stroke = 0.15,
+    alpha = 0.30
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant uncategorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_C4_1bNEO_other_significant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 2.2,
+    fill = "gray80",
+    color = "gray70",
+    stroke = 0.35,
+    alpha = 0.80
+  ) +
+
+  # ----------------------------------------------------------
+  # logFC thresholds at -4 and +4
+  # ----------------------------------------------------------
+
+  geom_vline(
+    xintercept = c(
+      -plot_logFC_threshold,
+      plot_logFC_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # FDR threshold
+  # ----------------------------------------------------------
+
+  geom_hline(
+    yintercept = -log10(
+      FDR_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant functionally categorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_C4_1bNEO_function_highlighted,
+    aes(
+      fill = Function_category,
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 3.2,
+    color = "black",
+    stroke = 0.45,
+    alpha = 0.95
+  ) +
+
+  # ----------------------------------------------------------
+  # Functional-category colors
+  # ----------------------------------------------------------
+
+  scale_fill_manual(
+    name = "Functional category",
+    values = c(
+      "Envelope and membrane stress" =
+        "lightblue",
+
+      "Stress response and regulation" =
+        "darkgreen",
+
+      "Membrane and periplasmic transport" =
+        "maroon",
+
+      "Energy and nucleotide homeostasis" =
+        "orange"
+    ),
+    drop = TRUE
+  ) +
+
+  guides(
+    fill = guide_legend(
+      override.aes = list(
+        shape = 21,
+        size = 4,
+        color = "black",
+        alpha = 1
+      )
+    )
+  ) +
+
+  labs(
+    title = "C4.1bNEO vs. EGFP",
+
+    x = expression(
+      log[2] * "(expression fold change)"
+    ),
+
+    y = expression(
+      -log[10] * "(FDR)"
+    )
+  ) +
+
+  theme(
+    aspect.ratio = 1 / 2,
+
+    legend.position = "right",
+
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold",
+      size = 13
+    ),
+
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+
+    panel.background = element_rect(
+      fill = "white",
+      colour = "black"
+    ),
+
+    text = element_text(
+      size = 12
+    ),
+
+    axis.title = element_text(
+      face = "bold",
+      size = 12
+    ),
+
+    legend.title = element_text(
+      face = "bold",
+      size = 11
+    ),
+
+    legend.text = element_text(
+      size = 9
+    )
+  )
+
+# ============================================================
+# Display static plot
+# ============================================================
+
+print(
+  C4_1bNEO_volcano
+)
+
+# ============================================================
+# Display interactive plot in the RStudio Viewer
+#
+# No output file is created.
+# ============================================================
+
+C4_1bNEO_volcano_interactive <- girafe(
+  ggobj = C4_1bNEO_volcano,
+  width_svg = 10,
+  height_svg = 5.8,
+  options = list(
+    opts_hover(
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:1.5px;"
+      )
+    ),
+
+    opts_selection(
+      type = "single",
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:2px;"
+      )
+    ),
+
+    opts_tooltip(
+      opacity = 0.95,
+      use_fill = TRUE,
+      use_stroke = TRUE,
+      css = paste0(
+        "background-color:black;",
+        "color:white;",
+        "padding:8px;",
+        "border-radius:3px;",
+        "font-size:12px;",
+        "max-width:700px;",
+        "white-space:normal;"
+      )
+    )
+  )
+)
+
+C4_1bNEO_volcano_interactive
+```
+
+```{r}
+library(edgeR)
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(ggiraph)
+library(stringr)
+
+# ============================================================
+# Settings
+# ============================================================
+
+annotation_file <- "./data/input/Annotations.csv"
+
+plot_logFC_threshold <- 2
+FDR_threshold <- 0.05
+
+# ============================================================
+# Check required objects
+# ============================================================
+
+required_objects <- c(
+  "y",
+  "design"
+)
+
+missing_objects <- required_objects[
+  !vapply(
+    required_objects,
+    exists,
+    logical(1),
+    inherits = TRUE
+  )
+]
+
+if (length(missing_objects) > 0) {
+  stop(
+    paste0(
+      "Missing required object(s): ",
+      paste(
+        missing_objects,
+        collapse = ", "
+      )
+    )
+  )
+}
+
+if (!file.exists(annotation_file)) {
+  stop(
+    paste0(
+      "Annotation file was not found: ",
+      annotation_file
+    )
+  )
+}
+
+# ============================================================
+# Read annotation file
+#
+# The annotation file is expected to be a headerless,
+# nine-column GFF-style CSV file.
+# ============================================================
+
+annotation_raw <- read.csv(
+  annotation_file,
+  header = FALSE,
+  stringsAsFactors = FALSE,
+  check.names = FALSE,
+  quote = "\"",
+  comment.char = ""
+)
+
+if (ncol(annotation_raw) != 9) {
+  stop(
+    paste0(
+      "The annotation file should contain 9 columns, but ",
+      ncol(annotation_raw),
+      " columns were detected."
+    )
+  )
+}
+
+colnames(annotation_raw) <- c(
+  "seqid",
+  "description",
+  "feature_type",
+  "start",
+  "end",
+  "score",
+  "strand",
+  "phase",
+  "attributes"
+)
+
+# ============================================================
+# Extract one attribute from the GFF attributes column
+# ============================================================
+
+extract_attribute <- function(
+    attributes,
+    key
+) {
+
+  attributes <- as.character(
+    attributes
+  )
+
+  pattern <- paste0(
+    "(?:^|;)",
+    key,
+    "=([^;]+)"
+  )
+
+  value <- str_match(
+    attributes,
+    pattern
+  )[, 2]
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2C",
+      ignore_case = TRUE
+    ),
+    ","
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%3B",
+      ignore_case = TRUE
+    ),
+    ";"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%28",
+      ignore_case = TRUE
+    ),
+    "("
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%29",
+      ignore_case = TRUE
+    ),
+    ")"
+  )
+
+  value <- str_replace_all(
+    value,
+    regex(
+      "%2B",
+      ignore_case = TRUE
+    ),
+    "+"
+  )
+
+  value <- str_replace_all(
+    value,
+    "\u00A0",
+    " "
+  )
+
+  str_squish(
+    value
+  )
+}
+
+# ============================================================
+# Parse structured annotation fields
+# ============================================================
+
+annotation_parsed <- annotation_raw %>%
+  mutate(
+    gene = extract_attribute(
+      attributes,
+      "gene"
+    ),
+
+    locus_tag = extract_attribute(
+      attributes,
+      "locus_tag"
+    ),
+
+    product = extract_attribute(
+      attributes,
+      "product"
+    )
+  )
+
+# ============================================================
+# Return the first nonmissing annotation for each locus
+# ============================================================
+
+first_nonmissing <- function(x) {
+
+  x <- as.character(
+    x
+  )
+
+  x <- x[
+    !is.na(x) &
+      x != ""
+  ]
+
+  if (length(x) == 0) {
+    return("N/A")
+  }
+
+  x[1]
+}
+
+# ============================================================
+# Collapse annotation rows into one row per locus tag
+# ============================================================
+
+MG1655_annotation <- annotation_parsed %>%
+  filter(
+    !is.na(locus_tag),
+    locus_tag != ""
+  ) %>%
+  group_by(
+    locus_tag
+  ) %>%
+  summarise(
+    chr = first_nonmissing(
+      seqid
+    ),
+
+    gene = first_nonmissing(
+      gene
+    ),
+
+    product = first_nonmissing(
+      product
+    ),
+
+    .groups = "drop"
+  ) %>%
+  rename(
+    GeneID = locus_tag
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    )
+  ) %>%
+  distinct(
+    GeneID,
+    .keep_all = TRUE
+  )
+
+# ============================================================
+# Functional classification
+#
+# Categories:
+#   1. Envelope and membrane stress
+#   2. Stress response and regulation
+#   3. Membrane and periplasmic transport
+#   4. Energy and nucleotide homeostasis
+# ============================================================
+
+classify_function <- function(
+    gene_lower,
+    product_lower
+) {
+
+  gene_lower <- ifelse(
+    is.na(gene_lower),
+    "",
+    tolower(
+      gene_lower
+    )
+  )
+
+  product_lower <- ifelse(
+    is.na(product_lower),
+    "",
+    tolower(
+      product_lower
+    )
+  )
+
+  case_when(
+
+    # ========================================================
+    # Envelope and membrane stress
+    # ========================================================
+
+    gene_lower %in% c(
+      "pspa",
+      "pspb",
+      "pspc",
+      "pspd",
+      "pspe",
+      "pspg",
+      "cpxp",
+      "yagu",
+      "yjfj",
+      "osmb",
+      "bsma",
+      "yiad",
+      "alx",
+      "asr",
+      "lpxc",
+      "yqae",
+      "bord",
+      "atpi"
+    ) ~
+
+      "Envelope and membrane stress",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bpspa family protein\\b|",
+        "\\bphage shock protein a\\b|",
+        "\\bphage shock protein b\\b|",
+        "\\bphage shock protein c\\b|",
+        "\\bphage shock protein d\\b|",
+        "\\bphage shock protein e\\b|",
+        "\\bphage shock protein g\\b|",
+        "\\bperiplasmic protein cpxp\\b|",
+        "\\bosmotically[- ]inducible lipoprotein\\b|",
+        "\\bmembrane[- ]bound redox modulator\\b|",
+        "\\bperiplasmic chaperone asr\\b|",
+        "\\bduf1471 domain[- ]containing putative lipoprotein\\b|",
+        "\\bpf13488 family lipoprotein\\b|",
+        "\\budp-3-o-acyl-n-acetylglucosamine deacetylase\\b|",
+        "\\batp synthase accessory factor atpi\\b"
+      )
+    ) ~
+
+      "Envelope and membrane stress",
+
+    # ========================================================
+    # Stress response and regulation
+    # ========================================================
+
+    gene_lower %in% c(
+      "soxs",
+      "ibpa",
+      "ibpb",
+      "ytfk",
+      "dusb",
+      "fis",
+      "mara",
+      "marr",
+      "marb",
+      "rpoh",
+      "iscr",
+      "nahr",
+      "soda",
+      "trxc",
+      "nrdh",
+      "nrdi",
+      "cyar",
+      "glmz",
+      "rbsz",
+      "rttr",
+      "dksa",
+      "grea",
+      "dead",
+      "obge",
+      "yjfn",
+      "yjhq",
+      "chps",
+      "slyx",
+      "yhab"
+    ) ~
+
+      "Stress response and regulation",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bdna-binding transcriptional dual regulator soxs\\b|",
+        "\\brna polymerase sigma factor rpoh\\b|",
+        "\\bstringent response modulator ytfk\\b|",
+        "\\bsuperoxide dismutase \\(mn\\)\\b|",
+        "\\bglutaredoxin-like protein nrdh\\b|",
+        "\\breduced thioredoxin 2\\b|",
+        "\\bdimanganese-tyrosyl radical cofactor maintenance flavodoxin nrdi\\b|",
+        "\\btranscription elongation factor grea\\b|",
+        "\\brna polymerase-binding transcription factor dksa\\b|",
+        "\\buniversal stress protein\\b|",
+        "\\bstress-induced protein\\b|",
+        "\\bstress response protein\\b|",
+        "\\bsmall regulatory rna cyar\\b|",
+        "\\bsmall regulatory rna glmz\\b|",
+        "\\bsmall regulatory rna rbsz\\b|",
+        "\\bsmall rna rttr\\b"
+      )
+    ) ~
+
+      "Stress response and regulation",
+
+    # ========================================================
+    # Membrane and periplasmic transport
+    # ========================================================
+
+    gene_lower %in% c(
+      "rbsa",
+      "rbsb",
+      "rbsc",
+      "male",
+      "malf",
+      "malg",
+      "malk",
+      "lamb",
+      "yhjx",
+      "manz",
+      "efeo",
+      "exut",
+      "mglb",
+      "mgla",
+      "gntt",
+      "gntp",
+      "nhaa",
+      "mgta",
+      "znta",
+      "fucp",
+      "sdac",
+      "frua",
+      "lldp",
+      "dcta",
+      "nupg",
+      "uraa",
+      "yhbe",
+      "yihn",
+      "plap",
+      "punc",
+      "mdla"
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\bfructuronate transporter\\b|",
+        "\\bhigh-affinity gluconate transporter\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter periplasmic binding protein\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter membrane subunit\\b|",
+        "\\bd-galactose/methyl-galactoside abc transporter atp binding subunit\\b|",
+        "\\bribose abc transporter periplasmic binding protein\\b|",
+        "\\bribose abc transporter membrane subunit\\b|",
+        "\\bribose abc transporter atp binding subunit\\b|",
+        "\\bmaltose abc transporter periplasmic binding protein\\b|",
+        "\\bmaltose abc transporter membrane subunit malf\\b|",
+        "\\bmaltose abc transporter membrane subunit malg\\b|",
+        "\\bmaltose abc transporter atp binding subunit\\b|",
+        "\\bmaltose outer membrane channel/phage lambda receptor protein\\b|",
+        "\\bna\\(\\+\\):h\\(\\+\\) antiporter nhaa\\b|",
+        "\\bl-fucose:h\\(\\+\\) symporter\\b|",
+        "\\bl-serine:h\\(\\+\\) symporter sdac\\b|",
+        "\\blactate/glycolate:h\\(\\+\\) symporter lldp\\b|",
+        "\\bc4 dicarboxylate/orotate:h\\(\\+\\) symporter\\b|",
+        "\\bnucleoside:h\\(\\+\\) symporter nupg\\b|",
+        "\\buracil:h\\(\\+\\) symporter uraa\\b|",
+        "\\bputrescine:h\\(\\+\\) symporter plap\\b|",
+        "\\bpurine nucleoside transporter punc\\b|",
+        "\\bmg\\(2\\(\\+\\)\\) importing p-type atpase\\b|",
+        "\\bzn\\(2\\(\\+\\)\\)/cd\\(2\\(\\+\\)\\)/pb\\(2\\(\\+\\)\\) exporting p-type atpase\\b|",
+        "\\bputative transporter yhjx\\b|",
+        "\\bputative transporter yhbe\\b|",
+        "\\bputative transporter yihn\\b|",
+        "\\bfructose-specific pts multiphosphoryl transfer protein frua\\b"
+      )
+    ) ~
+
+      "Membrane and periplasmic transport",
+
+    # ========================================================
+    # Energy and nucleotide homeostasis
+    # ========================================================
+
+    gene_lower %in% c(
+      "apt",
+      "deob",
+      "ndk",
+      "gmk",
+      "cmk",
+      "cara",
+      "carb",
+      "acs",
+      "fadb",
+      "fuma",
+      "fumc",
+      "pfla",
+      "lpda"
+    ) ~
+
+      "Energy and nucleotide homeostasis",
+
+    str_detect(
+      product_lower,
+      paste0(
+        "\\badenine phosphoribosyltransferase\\b|",
+        "\\bphosphopentomutase\\b|",
+        "\\bnucleoside diphosphate kinase\\b|",
+        "\\bguanylate kinase\\b|",
+        "\\bcytidylate kinase\\b|",
+        "\\bcarbamoyl-phosphate synthetase small subunit\\b|",
+        "\\bcarbamoyl-phosphate synthetase large subunit\\b|",
+        "\\bacetyl-coa synthetase \\(amp-forming\\)\\b|",
+        "\\bfatty acid oxidation complex subunit alpha\\b|",
+        "\\bfatty acid oxidation complex subunit fadb\\b|",
+        "\\bfumarase a\\b|",
+        "\\bfumarase c\\b|",
+        "\\bpyruvate formate-lyase activating enzyme\\b|",
+        "\\blipoamide dehydrogenase\\b"
+      )
+    ) ~
+
+      "Energy and nucleotide homeostasis",
+
+    TRUE ~
+      NA_character_
+  )
+}
+
+# ============================================================
+# Fit edgeR model
+# ============================================================
+
+fit <- glmQLFit(
+  y,
+  design
+)
+
+# ============================================================
+# Run C7.6bNEO versus EGFP contrast
+#
+# Assumed design-column order:
+#   1. EGFP
+#   2. KpnNEO
+#   3. C3.1bNEO
+#   4. C4.1bNEO
+#   5. C7.6bNEO
+#
+# Positive logFC means higher expression in C7.6bNEO
+# relative to EGFP.
+# ============================================================
+
+C7_6bNEO_test <- glmQLFTest(
+  fit,
+  contrast = c(
+    -1,
+    0,
+    0,
+    0,
+    1
+  )
+)
+
+dge_C7_6bNEO <- topTags(
+  C7_6bNEO_test,
+  n = Inf,
+  adjust.method = "BH",
+  sort.by = "PValue",
+  p.value = 1
+)$table %>%
+  rownames_to_column(
+    "GeneID"
+  ) %>%
+  mutate(
+    GeneID = as.character(
+      GeneID
+    )
+  ) %>%
+  left_join(
+    MG1655_annotation,
+    by = "GeneID"
+  ) %>%
+  mutate(
+    NEO = "C7.6bNEO",
+
+    gene = if_else(
+      is.na(gene) |
+        gene == "",
+      "N/A",
+      gene
+    ),
+
+    product = if_else(
+      is.na(product) |
+        product == "",
+      "N/A",
+      product
+    ),
+
+    chr = if_else(
+      is.na(chr) |
+        chr == "",
+      "N/A",
+      chr
+    ),
+
+    gene_lower = tolower(
+      str_squish(
+        gene
+      )
+    ),
+
+    product_lower = tolower(
+      str_squish(
+        product
+      )
+    ),
+
+    FDR_plot = pmax(
+      FDR,
+      .Machine$double.xmin
+    ),
+
+    Significant = (
+      abs(logFC) >= plot_logFC_threshold &
+        FDR < FDR_threshold
+    ),
+
+    Direction = case_when(
+      Significant &
+        logFC >= plot_logFC_threshold ~
+        "Upregulated",
+
+      Significant &
+        logFC <= -plot_logFC_threshold ~
+        "Downregulated",
+
+      TRUE ~
+        "Not significant"
+    ),
+
+    Function_category = classify_function(
+      gene_lower = gene_lower,
+      product_lower = product_lower
+    ),
+
+    Highlight_function = (
+      Significant &
+        !is.na(Function_category)
+    ),
+
+    Function_category = factor(
+      Function_category,
+      levels = c(
+        "Envelope and membrane stress",
+        "Stress response and regulation",
+        "Membrane and periplasmic transport",
+        "Energy and nucleotide homeostasis"
+      )
+    ),
+
+    point_id = paste(
+      NEO,
+      GeneID,
+      sep = "_"
+    ),
+
+    info = paste0(
+      "Condition: C7.6bNEO",
+      " | gene: ", gene,
+      " | product: ", product,
+      " | locus_tag: ", GeneID,
+      " | logFC: ", round(logFC, 4),
+      " | FDR: ", signif(FDR, 4),
+      " | direction: ", Direction,
+      " | category: ",
+      if_else(
+        is.na(Function_category),
+        "Other",
+        as.character(Function_category)
+      )
+    )
+  )
+
+# Preserve the previous dataframe naming convention
+dge_EGFP_v_C7_6bNEO <- dge_C7_6bNEO
+
+# ============================================================
+# Separate plotting layers
+# ============================================================
+
+dge_C7_6bNEO_nonsignificant <- dge_C7_6bNEO %>%
+  filter(
+    !Significant
+  )
+
+dge_C7_6bNEO_other_significant <- dge_C7_6bNEO %>%
+  filter(
+    Significant,
+    is.na(Function_category)
+  )
+
+dge_C7_6bNEO_function_highlighted <- dge_C7_6bNEO %>%
+  filter(
+    Highlight_function
+  )
+
+# ============================================================
+# C7.6bNEO volcano plot
+#
+# Functional category = fill color
+# Other significant   = gray
+# Nonsignificant      = light gray
+# ============================================================
+
+C7_6bNEO_volcano <- ggplot(
+  dge_C7_6bNEO,
+  aes(
+    x = logFC,
+    y = -log10(FDR_plot)
+  )
+) +
+
+  # ----------------------------------------------------------
+  # Nonsignificant genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_C7_6bNEO_nonsignificant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 1.3,
+    fill = "gray80",
+    color = "gray70",
+    stroke = 0.15,
+    alpha = 0.30
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant uncategorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_C7_6bNEO_other_significant,
+    aes(
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 2.2,
+    fill = "gray80",
+    color = "gray70",
+    stroke = 0.35,
+    alpha = 0.80
+  ) +
+
+  # ----------------------------------------------------------
+  # logFC thresholds at -4 and +4
+  # ----------------------------------------------------------
+
+  geom_vline(
+    xintercept = c(
+      -plot_logFC_threshold,
+      plot_logFC_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # FDR threshold
+  # ----------------------------------------------------------
+
+  geom_hline(
+    yintercept = -log10(
+      FDR_threshold
+    ),
+    linetype = "dashed",
+    color = "gray40"
+  ) +
+
+  # ----------------------------------------------------------
+  # Significant functionally categorized genes
+  # ----------------------------------------------------------
+
+  geom_point_interactive(
+    data = dge_C7_6bNEO_function_highlighted,
+    aes(
+      fill = Function_category,
+      tooltip = info,
+      data_id = point_id
+    ),
+    shape = 21,
+    size = 3.2,
+    color = "black",
+    stroke = 0.45,
+    alpha = 0.95
+  ) +
+
+  # ----------------------------------------------------------
+  # Functional-category colors
+  # ----------------------------------------------------------
+
+  scale_fill_manual(
+    name = "Functional category",
+    values = c(
+      "Envelope and membrane stress" =
+        "lightblue",
+
+      "Stress response and regulation" =
+        "darkgreen",
+
+      "Membrane and periplasmic transport" =
+        "maroon",
+
+      "Energy and nucleotide homeostasis" =
+        "orange"
+    ),
+    drop = TRUE
+  ) +
+
+  guides(
+    fill = guide_legend(
+      override.aes = list(
+        shape = 21,
+        size = 4,
+        color = "black",
+        alpha = 1
+      )
+    )
+  ) +
+
+  labs(
+    title = "C7.6bNEO vs. EGFP",
+
+    x = expression(
+      log[2] * "(expression fold change)"
+    ),
+
+    y = expression(
+      -log[10] * "(FDR)"
+    )
+  ) +
+
+  theme(
+    aspect.ratio = 1 / 2,
+
+    legend.position = "right",
+
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "bold",
+      size = 13
+    ),
+
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+
+    panel.background = element_rect(
+      fill = "white",
+      colour = "black"
+    ),
+
+    text = element_text(
+      size = 12
+    ),
+
+    axis.title = element_text(
+      face = "bold",
+      size = 12
+    ),
+
+    legend.title = element_text(
+      face = "bold",
+      size = 11
+    ),
+
+    legend.text = element_text(
+      size = 9
+    )
+  )
+
+# ============================================================
+# Display static plot
+# ============================================================
+
+print(
+  C7_6bNEO_volcano
+)
+
+# ============================================================
+# Display interactive plot in the RStudio Viewer
+#
+# No output file is created.
+# ============================================================
+
+C7_6bNEO_volcano_interactive <- girafe(
+  ggobj = C7_6bNEO_volcano,
+  width_svg = 10,
+  height_svg = 5.8,
+  options = list(
+    opts_hover(
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:1.5px;"
+      )
+    ),
+
+    opts_selection(
+      type = "single",
+      css = paste0(
+        "stroke:black;",
+        "stroke-width:2px;"
+      )
+    ),
+
+    opts_tooltip(
+      opacity = 0.95,
+      use_fill = TRUE,
+      use_stroke = TRUE,
+      css = paste0(
+        "background-color:black;",
+        "color:white;",
+        "padding:8px;",
+        "border-radius:3px;",
+        "font-size:12px;",
+        "max-width:700px;",
+        "white-space:normal;"
+      )
+    )
+  )
+)
+
+C7_6bNEO_volcano_interactive
+```
